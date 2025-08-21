@@ -538,6 +538,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
      <div class="header">
@@ -1525,7 +1526,10 @@ function updateProgressTabChart() {
     }
 }
 
-// --------------- Subject Progress / Matrix -----------------
+        // ------------------- Subject Progress / Matrix -----------------
+let progressMatrixChart = null;
+let progressTabChart = null; // Pie chart for student progress
+
 function updateProgressMatrixChart() {
     const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
@@ -1561,7 +1565,46 @@ function updateProgressMatrixChart() {
     }
 }
 
-// --------------- Milestones -----------------
+// ------------------- Student Progress Pie Chart -----------------
+function updateProgressTabChart() {
+    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    if (!savedData?.tableData?.schedule?.progress) return;
+
+    const progressArray = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
+    const totalSlots = progressArray.length;
+    const completedSlots = progressArray.filter(v => v === 100).length;
+    const aggregate = totalSlots ? Math.round((completedSlots / totalSlots) * 100) : 0;
+
+    const data = {
+        labels: ['Completed', 'Remaining'],
+        datasets: [{
+            data: [aggregate, 100 - aggregate],
+            backgroundColor: ['#10B981', '#E5E7EB'],
+            borderWidth: 0
+        }]
+    };
+
+    const config = {
+        type: 'doughnut',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    };
+
+    const ctx = document.getElementById('progressTabChart').getContext('2d');
+    if (!progressTabChart) {
+        progressTabChart = new Chart(ctx, config);
+    } else {
+        progressTabChart.data = data;
+        progressTabChart.update();
+    }
+}
+
+// ------------------- Milestones -----------------
 function updateMilestones() {
     const container = document.getElementById('milestones');
     container.innerHTML = '';
@@ -1586,14 +1629,14 @@ function updateMilestones() {
     });
 }
 
-// --------------- Live Update -----------------
+// ------------------- Live Update -----------------
 function refreshProgressTab() {
-    updateProgressTabChart();
-    updateProgressMatrixChart();
-    updateMilestones();
+    updateProgressTabChart();       // Pie chart
+    updateProgressMatrixChart();    // Bar chart
+    updateMilestones();             // Milestones
 }
 
-// Call on load
+// Call on load and after autosave
 window.addEventListener('load', refreshProgressTab);
 
         function setupAutoSaveListeners() {
