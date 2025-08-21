@@ -1325,19 +1325,20 @@
         }
 
         function triggerAutoSave() {
-            // Clear existing timer
-            if (autoSaveTimer) {
-                clearTimeout(autoSaveTimer);
-            }
-            
-            // Show saving indicator immediately
-            showSaveIndicator('💾 Saving...', 'rgba(59, 130, 246, 0.95)');
-            
-            // Set new timer for 1 second delay
-            autoSaveTimer = setTimeout(() => {
-                autoSave();
-            }, 1000);
-        }
+    // Clear existing timer
+    if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+    }
+    
+    // Show saving indicator immediately
+    showSaveIndicator('💾 Saving...', 'rgba(59, 130, 246, 0.95)');
+    
+    // Set new timer for 1 second delay
+    autoSaveTimer = setTimeout(() => {
+        autoSave();               // save main tables and form data
+        saveProgressMatrix();     // ALSO save the progress matrix at the same time
+    }, 1000);
+}
 
         function loadAutoSavedData() {
             try {
@@ -1388,6 +1389,42 @@
                 return false;
             }
         }
+
+// Save progress matrix
+function saveProgressMatrix() {
+    const table = document.getElementById("scheduleTable");
+    const progressData = [];
+
+    table.querySelectorAll("tr").forEach(row => {
+        const select = row.querySelector(".progress-matrix");
+        progressData.push(select ? select.value : "");
+    });
+
+    let savedData = JSON.parse(localStorage.getItem('eduflow_autosave')) || {};
+    savedData.tableData = savedData.tableData || {};
+    savedData.tableData.schedule = savedData.tableData.schedule || {};
+    savedData.tableData.schedule.progress = progressData;
+
+    localStorage.setItem('eduflow_autosave', JSON.stringify(savedData));
+
+    // Update visual metric if dashboard exists
+    updateProgressChart();
+}
+
+// Restore progress matrix
+function restoreProgressMatrix() {
+    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    if (savedData?.tableData?.schedule?.progress) {
+        const table = document.getElementById("scheduleTable");
+        table.querySelectorAll("tr").forEach((row, i) => {
+            const select = row.querySelector(".progress-matrix");
+            if (select) select.value = savedData.tableData.schedule.progress[i] || "";
+        });
+    }
+
+    // Update visual metric if dashboard exists
+    updateProgressChart();
+}
 
         function setupAutoSaveListeners() {
             // Only add listeners to table elements and planning fields
@@ -4439,6 +4476,10 @@
                 changeLanguage(savedLang);
             }
         });
+// Load all saved data when the page loads
+window.addEventListener("load", () => {
+    loadAutoSavedData();
+});
     </script>
 </body>
 </html>
