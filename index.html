@@ -1478,94 +1478,46 @@ function updateOverviewProgressChart() {
     }
 }
 
-// Update mini chart after restoring progress matrix
-window.addEventListener("load", updateOverviewProgressChart);
+// ------------------- Progress Tab Charts -------------------
+let progressTabChart = null;       // Pie chart for Student Progress
+let progressMatrixChart = null;    // Bar chart for Subject Progress
 
-}
-       let progressTabChart = null;
-let progressMatrixChart = null;
+// ------------------- Save & Restore Progress Matrix -----------------
+function saveProgressMatrix() {
+    const table = document.getElementById("scheduleTable");
+    const progressData = [];
 
-// --------------- Aggregate Student Progress -----------------
-function updateProgressTabChart() {
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
-    if (!savedData?.tableData?.schedule?.progress) return;
-
-    const progressArray = savedData.tableData.schedule.progress.map(p => {
-        const val = parseInt(p);
-        return isNaN(val) ? 0 : val;
+    table.querySelectorAll("tr").forEach(row => {
+        const select = row.querySelector(".progress-matrix");
+        progressData.push(select ? select.value : "");
     });
 
-    const totalSlots = progressArray.length;
-    const completedSlots = progressArray.filter(v => v === 100).length;
-    const aggregate = totalSlots ? Math.round((completedSlots / totalSlots) * 100) : 0;
+    let savedData = JSON.parse(localStorage.getItem('eduflow_autosave')) || {};
+    savedData.tableData = savedData.tableData || {};
+    savedData.tableData.schedule = savedData.tableData.schedule || {};
+    savedData.tableData.schedule.progress = progressData;
 
-    const data = {
-        labels: ['Completed', 'Remaining'],
-        datasets: [{
-            data: [aggregate, 100 - aggregate],
-            backgroundColor: ['#10B981', '#E5E7EB'],
-            borderWidth: 0
-        }]
-    };
+    localStorage.setItem('eduflow_autosave', JSON.stringify(savedData));
 
-    const config = {
-        type: 'doughnut',
-        data: data,
-        options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom' } }
-        }
-    };
-
-    const ctx = document.getElementById('progressTabChart').getContext('2d');
-    if (!progressTabChart) {
-        progressTabChart = new Chart(ctx, config);
-    } else {
-        progressTabChart.data = data;
-        progressTabChart.update();
-    }
+    // Refresh visuals after saving
+    refreshProgressTab();
 }
 
-        // ------------------- Subject Progress / Matrix -----------------
-let progressMatrixChart = null;
-let progressTabChart = null; // Pie chart for student progress
-
-function updateProgressMatrixChart() {
+function restoreProgressMatrix() {
     const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
-    if (!savedData?.tableData?.schedule?.progress) return;
-
-    const labels = savedData.lessons?.map(l => l.name) || [];
-    const dataSet = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
-
-    const data = {
-        labels: labels,
-        datasets: [{
-            label: 'Progress %',
-            data: dataSet,
-            backgroundColor: '#3B82F6'
-        }]
-    };
-
-    const config = {
-        type: 'bar',
-        data: data,
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            scales: { x: { min: 0, max: 100 } }
-        }
-    };
-
-    const ctx = document.getElementById('progressMatrixChart').getContext('2d');
-    if (!progressMatrixChart) {
-        progressMatrixChart = new Chart(ctx, config);
-    } else {
-        progressMatrixChart.data = data;
-        progressMatrixChart.update();
+    if (savedData?.tableData?.schedule?.progress) {
+        const table = document.getElementById("scheduleTable");
+        table.querySelectorAll("tr").forEach((row, i) => {
+            const select = row.querySelector(".progress-matrix");
+            if (select) select.value = savedData.tableData.schedule.progress[i] || "";
+        });
     }
+
+    // Refresh visuals after restoring
+    refreshProgressTab();
 }
 
-// ------------------- Student Progress Pie Chart -----------------
+// ------------------- Student Pie Chart -----------------
 function updateProgressTabChart() {
     const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
@@ -1577,23 +1529,10 @@ function updateProgressTabChart() {
 
     const data = {
         labels: ['Completed', 'Remaining'],
-        datasets: [{
-            data: [aggregate, 100 - aggregate],
-            backgroundColor: ['#10B981', '#E5E7EB'],
-            borderWidth: 0
-        }]
+        datasets: [{ data: [aggregate, 100 - aggregate], backgroundColor: ['#10B981', '#E5E7EB'], borderWidth: 0 }]
     };
 
-    const config = {
-        type: 'doughnut',
-        data: data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
-    };
+    const config = { type: 'doughnut', data: data, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } };
 
     const ctx = document.getElementById('progressTabChart').getContext('2d');
     if (!progressTabChart) {
@@ -1604,7 +1543,31 @@ function updateProgressTabChart() {
     }
 }
 
-// ------------------- Milestones -----------------
+// ------------------- Progress Matrix Bar Chart -----------------
+function updateProgressMatrixChart() {
+    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    if (!savedData?.tableData?.schedule?.progress) return;
+
+    const labels = savedData.lessons?.map(l => l.name) || [];
+    const dataSet = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
+
+    const data = {
+        labels: labels,
+        datasets: [{ label: 'Progress %', data: dataSet, backgroundColor: '#3B82F6' }]
+    };
+
+    const config = { type: 'bar', data: data, options: { indexAxis: 'y', responsive: true, scales: { x: { min: 0, max: 100 } } } };
+
+    const ctx = document.getElementById('progressMatrixChart').getContext('2d');
+    if (!progressMatrixChart) {
+        progressMatrixChart = new Chart(ctx, config);
+    } else {
+        progressMatrixChart.data = data;
+        progressMatrixChart.update();
+    }
+}
+
+// ------------------- Achievement Milestones -----------------
 function updateMilestones() {
     const container = document.getElementById('milestones');
     container.innerHTML = '';
@@ -1629,15 +1592,26 @@ function updateMilestones() {
     });
 }
 
-// ------------------- Live Update -----------------
+// ------------------- Refresh All Progress Tab Visuals -----------------
 function refreshProgressTab() {
     updateProgressTabChart();       // Pie chart
     updateProgressMatrixChart();    // Bar chart
     updateMilestones();             // Milestones
 }
 
-// Call on load and after autosave
-window.addEventListener('load', refreshProgressTab);
+// ------------------- Initialize on Page Load -----------------
+window.addEventListener('load', () => {
+    restoreProgressMatrix();
+});
+
+// ------------------- AutoSave Listener -----------------
+function setupAutoSaveListeners() {
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('textarea') && e.target.closest('#monthlyPlanTable, #weeklyPlanTable, #scheduleTable')) {
+            triggerAutoSave();
+        }
+    });
+}
 
         function setupAutoSaveListeners() {
             // Only add listeners to table elements and planning fields
