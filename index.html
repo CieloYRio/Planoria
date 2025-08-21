@@ -1479,11 +1479,11 @@ function updateOverviewProgressChart() {
 window.addEventListener("load", updateOverviewProgressChart);
 
 }
-       // ------------------- Progress Tab Charts -------------------
-let progressTabChart = null;
+       let progressTabChart = null;
 let progressMatrixChart = null;
 
-function updateProgressCharts() {
+// --------------- Aggregate Student Progress -----------------
+function updateProgressTabChart() {
     const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
 
@@ -1496,8 +1496,7 @@ function updateProgressCharts() {
     const completedSlots = progressArray.filter(v => v === 100).length;
     const aggregate = totalSlots ? Math.round((completedSlots / totalSlots) * 100) : 0;
 
-    // ---------- Mini Aggregate Chart ----------
-    const aggregateData = {
+    const data = {
         labels: ['Completed', 'Remaining'],
         datasets: [{
             data: [aggregate, 100 - aggregate],
@@ -1505,52 +1504,95 @@ function updateProgressCharts() {
             borderWidth: 0
         }]
     };
-    const aggregateConfig = {
+
+    const config = {
         type: 'doughnut',
-        data: aggregateData,
+        data: data,
         options: {
             responsive: true,
             plugins: { legend: { position: 'bottom' } }
         }
     };
+
+    const ctx = document.getElementById('progressTabChart').getContext('2d');
     if (!progressTabChart) {
-        const ctx = document.getElementById('progressTabChart').getContext('2d');
-        progressTabChart = new Chart(ctx, aggregateConfig);
+        progressTabChart = new Chart(ctx, config);
     } else {
-        progressTabChart.data = aggregateData;
+        progressTabChart.data = data;
         progressTabChart.update();
     }
+}
 
-    // ---------- Progress Matrix Chart ----------
-    const subjects = savedData.subjects || [];
-    const matrixData = {
-        labels: subjects.map(s => s.name),
+// --------------- Subject Progress / Matrix -----------------
+function updateProgressMatrixChart() {
+    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    if (!savedData?.tableData?.schedule?.progress) return;
+
+    const labels = savedData.lessons?.map(l => l.name) || [];
+    const dataSet = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
+
+    const data = {
+        labels: labels,
         datasets: [{
             label: 'Progress %',
-            data: subjects.map((s, i) => progressArray[i] || 0),
+            data: dataSet,
             backgroundColor: '#3B82F6'
         }]
     };
-    const matrixConfig = {
+
+    const config = {
         type: 'bar',
-        data: matrixData,
+        data: data,
         options: {
+            indexAxis: 'y',
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { min: 0, max: 100 } }
+            scales: { x: { min: 0, max: 100 } }
         }
     };
+
+    const ctx = document.getElementById('progressMatrixChart').getContext('2d');
     if (!progressMatrixChart) {
-        const ctxMatrix = document.getElementById('progressMatrixChart').getContext('2d');
-        progressMatrixChart = new Chart(ctxMatrix, matrixConfig);
+        progressMatrixChart = new Chart(ctx, config);
     } else {
-        progressMatrixChart.data = matrixData;
+        progressMatrixChart.data = data;
         progressMatrixChart.update();
     }
 }
 
-// Update charts whenever progress matrix is restored
-window.addEventListener('load', updateProgressCharts);
+// --------------- Milestones -----------------
+function updateMilestones() {
+    const container = document.getElementById('milestones');
+    container.innerHTML = '';
+
+    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    if (!savedData?.tableData?.schedule?.progress) return;
+
+    const progressArray = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
+
+    const milestones = [
+        { name: 'Excellent', threshold: 80 },
+        { name: 'Good', threshold: 50 },
+        { name: 'Needs Improvement', threshold: 0 }
+    ];
+
+    milestones.forEach(m => {
+        const count = progressArray.filter(v => v >= m.threshold).length;
+        const div = document.createElement('div');
+        div.style.marginBottom = '8px';
+        div.textContent = `${m.name}: ${count} subjects`;
+        container.appendChild(div);
+    });
+}
+
+// --------------- Live Update -----------------
+function refreshProgressTab() {
+    updateProgressTabChart();
+    updateProgressMatrixChart();
+    updateMilestones();
+}
+
+// Call on load
+window.addEventListener('load', refreshProgressTab);
 
         function setupAutoSaveListeners() {
             // Only add listeners to table elements and planning fields
