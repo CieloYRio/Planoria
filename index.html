@@ -4500,6 +4500,175 @@ document.addEventListener('click', function(event) {
         event.target.classList.remove('active');
     }
 });
+        // ------------------- UNIFIED AUTO-SAVE & RESTORE -----------------
+(function() {
+    const LOCAL_STORAGE_KEY = 'eduflow_data';
+
+    // ------------------- Save all data -----------------
+    function saveAllData() {
+        const data = {
+            learnerName: document.getElementById('learnerName')?.value || '',
+            teacherName: document.getElementById('teacherName')?.value || '',
+            schoolName: document.getElementById('schoolName')?.value || '',
+            schoolYear: document.getElementById('globalSchoolYearStart')?.value || '',
+            subjectList: getTableData('subjectTable'), // Subject Tab
+            curriculumSubjectWise: getTableData('curriculumSubjectTable'),
+            curriculumPeriodWise: getTableData('curriculumPeriodTable'),
+            dailySchedule: getDailyScheduleData(),
+            progressMatrix: getProgressMatrixData(),
+            template: localStorage.getItem('eduflow_template') || ''
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+        console.log('✅ EduFlow: Data saved');
+    }
+
+    // ------------------- Restore all data -----------------
+    function restoreAllData() {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!saved) return false;
+
+        try {
+            const data = JSON.parse(saved);
+
+            if (data.learnerName) document.getElementById('learnerName').value = data.learnerName;
+            if (data.teacherName) document.getElementById('teacherName').value = data.teacherName;
+            if (data.schoolName) document.getElementById('schoolName').value = data.schoolName;
+            if (data.schoolYear) document.getElementById('globalSchoolYearStart').value = data.schoolYear;
+
+            if (data.subjectList) setTableData('subjectTable', data.subjectList);
+            if (data.curriculumSubjectWise) setTableData('curriculumSubjectTable', data.curriculumSubjectWise);
+            if (data.curriculumPeriodWise) setTableData('curriculumPeriodTable', data.curriculumPeriodWise);
+
+            if (data.dailySchedule) restoreDailySchedule(data.dailySchedule);
+            if (data.progressMatrix) restoreProgressMatrix(data.progressMatrix);
+
+            if (data.template) localStorage.setItem('eduflow_template', JSON.stringify(data.template));
+
+            console.log('✅ EduFlow: Data restored');
+            return true;
+        } catch (e) {
+            console.error('❌ EduFlow: Failed to restore data', e);
+            return false;
+        }
+    }
+
+    // ------------------- Daily Schedule Helpers -----------------
+    function getDailyScheduleData() {
+        const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+        const scheduleData = {};
+        days.forEach(day => {
+            const table = document.getElementById('scheduleTable');
+            if (!table) return;
+            scheduleData[day] = [];
+            table.querySelectorAll('tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 2) {
+                    scheduleData[day].push({
+                        time: cells[0].querySelector('input')?.value || '',
+                        subject: cells[1].querySelector('select')?.value || '',
+                        subjectText: cells[1].querySelector('select')?.selectedOptions[0]?.textContent || '',
+                        objectives: cells[2]?.querySelector('textarea')?.value || '',
+                        activities: cells[3]?.querySelector('textarea')?.value || '',
+                        materials: cells[4]?.querySelector('textarea')?.value || '',
+                        notes: cells[5]?.querySelector('textarea')?.value || '',
+                        progress: cells[6]?.querySelector('select')?.value || ''
+                    });
+                }
+            });
+        });
+        return scheduleData;
+    }
+
+    function restoreDailySchedule(dailyData) {
+        window.dailyScheduleData = dailyData; // assign to global variable
+        const currentDay = document.getElementById('scheduleDay')?.value || 'monday';
+        if (!dailyData[currentDay] || dailyData[currentDay].length === 0) return;
+
+        const table = document.getElementById('scheduleTable');
+        if (!table) return;
+        table.innerHTML = '';
+
+        dailyData[currentDay].forEach(slot => {
+            addTimeSlot(slot.time);
+            const lastRow = table.lastElementChild;
+            if (!lastRow) return;
+
+            const cells = lastRow.querySelectorAll('td');
+            if (cells[1]?.querySelector('select')) cells[1].querySelector('select').value = slot.subject;
+            if (cells[2]?.querySelector('textarea')) cells[2].querySelector('textarea').value = slot.objectives;
+            if (cells[3]?.querySelector('textarea')) cells[3].querySelector('textarea').value = slot.activities;
+            if (cells[4]?.querySelector('textarea')) cells[4].querySelector('textarea').value = slot.materials;
+            if (cells[5]?.querySelector('textarea')) cells[5].querySelector('textarea').value = slot.notes;
+            if (cells[6]?.querySelector('select')) cells[6].querySelector('select').value = slot.progress;
+        });
+    }
+
+    // ------------------- Table Helpers -----------------
+    function getTableData(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return [];
+        const rows = [];
+        table.querySelectorAll('tr').forEach(row => {
+            const cells = row.querySelectorAll('td, th');
+            const rowData = [];
+            cells.forEach(cell => rowData.push(cell.querySelector('input, textarea, select')?.value || cell.textContent || ''));
+            rows.push(rowData);
+        });
+        return rows;
+    }
+
+    function setTableData(tableId, data) {
+        const table = document.getElementById(tableId);
+        if (!table || !data) return;
+        table.innerHTML = '';
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            row.forEach(cell => {
+                const td = document.createElement('td');
+                td.textContent = cell;
+                tr.appendChild(td);
+            });
+            table.appendChild(tr);
+        });
+    }
+
+    // ------------------- Progress Matrix -----------------
+    function getProgressMatrixData() {
+        const selects = document.querySelectorAll('.progress-matrix');
+        const matrix = [];
+        selects.forEach(s => matrix.push(s.value || ''));
+        return matrix;
+    }
+
+    function restoreProgressMatrix(saved = null) {
+        const matrix = saved || getProgressMatrixData();
+        const selects = document.querySelectorAll('.progress-matrix');
+        selects.forEach((s, i) => {
+            s.value = matrix[i] || '';
+        });
+    }
+
+    // ------------------- Auto-Save -----------------
+    function triggerAutoSave() {
+        saveAllData();
+    }
+
+    function setupUnifiedAutoSave() {
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('input, textarea')) triggerAutoSave();
+        });
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('input, textarea, select')) triggerAutoSave();
+        });
+        window.addEventListener('beforeunload', triggerAutoSave);
+    }
+
+    // ------------------- Initialize -----------------
+    window.addEventListener('load', () => {
+        restoreAllData();
+        setupUnifiedAutoSave();
+    });
+})();
     </script>
 </body>
 </html>
