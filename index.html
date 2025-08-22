@@ -1539,7 +1539,7 @@ function refreshProgressTab() {
 
 // ------------------- Initialize on Page Load -----------------
 window.addEventListener('load', () => {
-    restoreProgressMatrix();
+    // restoreProgressMatrix();  // ❌ Remove or comment out; handled by unified daily schedule restore
 });
 
 // ------------------- AutoSave Listener -----------------
@@ -2843,13 +2843,8 @@ function showView(viewId) {
             
             localStorage.setItem('eduflow_completed_days', JSON.stringify(completedDays));
             
-            // Update milestone progress
-            updateMilestoneProgress('days', 1);
-            
             alert(`🎉 ${currentDay.charAt(0).toUpperCase() + currentDay.slice(1)} Schedule Complete!\n\n✅ ${filledSlots} time slots completed\n📅 Date: ${scheduleDate}\n🏆 Progress tracked\n\nExcellent work on your daily planning!`);
-            
-            // Trigger auto-save
-            triggerAutoSave();
+           
         }
 
         // Update weekly planning to sync with subjects
@@ -4029,10 +4024,10 @@ function showView(viewId) {
 
     row.innerHTML = `
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <input type="text" value="${timeSlot}" placeholder="Time slot" style="width: 100%; border: none; background: transparent; padding: 4px; font-weight: 600;" onchange="updateWeeklyFromDaily()">
+            <input type="text" value="${timeSlot}" placeholder="Time slot" style="width: 100%; border: none; background: transparent; padding: 4px; font-weight: 600;">
         </td>
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <select style="width: 100%; border: none; background: transparent; padding: 4px;" onchange="updateWeeklyFromDaily()">
+            <select style="width: 100%; border: none; background: transparent; padding: 4px;">
                 <option value="">Select Subject</option>
                 <option value="mathematics">🔢 Mathematics</option>
                 <option value="science">🔬 Science</option>
@@ -4047,19 +4042,19 @@ function showView(viewId) {
             </select>
         </td>
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <textarea placeholder="Learning objectives for this time slot..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;" onchange="updateWeeklyFromDaily()"></textarea>
+            <textarea placeholder="Learning objectives for this time slot..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;"></textarea>
         </td>
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <textarea placeholder="Activities and tasks..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;" onchange="updateWeeklyFromDaily()"></textarea>
+            <textarea placeholder="Activities and tasks..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;"></textarea>
         </td>
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <textarea placeholder="Materials needed..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;" onchange="updateWeeklyFromDaily()"></textarea>
+            <textarea placeholder="Materials needed..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;"></textarea>
         </td>
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <textarea placeholder="Notes..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;" onchange="updateWeeklyFromDaily()"></textarea>
+            <textarea placeholder="Notes..." style="width: 100%; border: none; background: transparent; resize: vertical; min-height: 50px; padding: 4px;"></textarea>
         </td>
         <td style="padding: 8px; border: 1px solid #e5e7eb;">
-            <select class="progress-matrix" style="width: 100%; border: none; background: transparent; padding: 4px;" onchange="saveProgressMatrix()">
+            <select class="progress-matrix" style="width: 100%; border: none; background: transparent; padding: 4px;">
                 <option value="">Select Progress</option>
                 <option value="Excellent">Excellent</option>
                 <option value="Good">Good</option>
