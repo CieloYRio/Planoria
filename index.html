@@ -4446,180 +4446,76 @@ document.addEventListener('DOMContentLoaded', setupAutoSaveListeners);
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default date for lesson form to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('lessonDate').value = today;
-            document.getElementById('scheduleDate').value = today;
-            
-            // Set default school year start to current September in global settings
-            const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth();
-            const schoolYear = currentMonth >= 8 ? currentYear : currentYear - 1; // September = month 8
-            document.getElementById('globalSchoolYearStart').value = `${schoolYear}-09`;
-            
-            // Initialize global settings
-            updateGlobalCountrySettings();
-            updateGlobalCalendarSystem();
-            
-            // Try to load auto-saved data first, then fall back to template
-            const autoSaveLoaded = loadAutoSavedData();
-            
-            if (!autoSaveLoaded) {
-                // Load saved template if exists and no auto-save data
-                const savedTemplate = localStorage.getItem('eduflow_template');
-                if (savedTemplate) {
-                    try {
-                        const data = JSON.parse(savedTemplate);
-                        if (data.learnerName) document.getElementById('learnerName').value = data.learnerName;
-                        if (data.teacherName) document.getElementById('teacherName').value = data.teacherName;
-                        if (data.planningData) {
-                            if (data.planningData.learningGoals) document.getElementById('learningGoals').value = data.planningData.learningGoals;
-                            if (data.planningData.prerequisites) document.getElementById('prerequisites').value = data.planningData.prerequisites;
-                            if (data.planningData.teachingNotes) document.getElementById('teachingNotes').value = data.planningData.teachingNotes;
-                            if (data.planningData.mappingInsights) document.getElementById('mappingInsights').value = data.planningData.mappingInsights;
-                        }
-                    } catch (e) {
-                        console.log('Could not load saved template');
-                    }
-                }
-            }
-            
-            // Initialize all interconnected data
-            updateAllSections();
-            addHeaderUpdateListeners();
-            
-            // Setup auto-save functionality
-            setupAutoSaveListeners();
-            createSaveIndicator();
-            
-            // Update header info after data is loaded
-            setTimeout(() => {
-                updateHeaderInfo();
-                updateSubjectTitle();
-            }, 100);
-        });
+    // Set default date for lesson form and schedule
+    const today = new Date().toISOString().split('T')[0];
+    const lessonDate = document.getElementById('lessonDate');
+    const scheduleDate = document.getElementById('scheduleDate');
+    if (lessonDate) lessonDate.value = today;
+    if (scheduleDate) scheduleDate.value = today;
 
-         // Close modals when clicking outside
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
-            }
-        }); // <- This was missing the closing brace!
+    // Set default school year start
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    const schoolYear = currentMonth >= 8 ? currentYear : currentYear - 1;
+    const schoolYearInput = document.getElementById('globalSchoolYearStart');
+    if (schoolYearInput) schoolYearInput.value = `${schoolYear}-09`;
 
-        // Simple Translation System
-        const translations = {
-            en: {
-                interfaceLanguage: "🌐 Interface Language",
-                learnerName: "Learner Name", 
-                teacherName: "Teacher Name",
-                countryRegion: "Country/Region",
-                calendarSystem: "Calendar System",
-                schoolYearStart: "School Year Start",
-                academicYear: "Academic Year",
-                gradeLevel: "Grade Level"
-            },
-            es: {
-                interfaceLanguage: "🌐 Idioma de Interfaz",
-                learnerName: "Nombre del Estudiante",
-                teacherName: "Nombre del Profesor", 
-                countryRegion: "País/Región",
-                calendarSystem: "Sistema de Calendario",
-                schoolYearStart: "Inicio del Año Escolar",
-                academicYear: "Año Académico",
-                gradeLevel: "Nivel de Grado"
-            },
-            fr: {
-                interfaceLanguage: "🌐 Langue d'Interface",
-                learnerName: "Nom de l'Apprenant",
-                teacherName: "Nom de l'Enseignant",
-                countryRegion: "Pays/Région", 
-                calendarSystem: "Système de Calendrier",
-                schoolYearStart: "Début de l'Année Scolaire",
-                academicYear: "Année Académique",
-                gradeLevel: "Niveau Scolaire"
-            },
-            de: {
-                interfaceLanguage: "🌐 Oberflächensprache",
-                learnerName: "Name des Lernenden",
-                teacherName: "Lehrername",
-                countryRegion: "Land/Region",
-                calendarSystem: "Kalendersystem", 
-                schoolYearStart: "Schuljahresbeginn",
-                academicYear: "Schuljahr",
-                gradeLevel: "Klassenstufe"
-            },
-            zh: {
-                interfaceLanguage: "🌐 界面语言",
-                learnerName: "学习者姓名",
-                teacherName: "教师姓名",
-                countryRegion: "国家/地区",
-                calendarSystem: "日历系统",
-                schoolYearStart: "学年开始",
-                academicYear: "学年",
-                gradeLevel: "年级"
-            },
-            ja: {
-                interfaceLanguage: "🌐 インターフェース言語",
-                learnerName: "学習者名",
-                teacherName: "教師名", 
-                countryRegion: "国/地域",
-                calendarSystem: "カレンダーシステム",
-                schoolYearStart: "学年開始",
-                academicYear: "学年度",
-                gradeLevel: "学年"
-            }
-        };
+    // Initialize global settings
+    updateGlobalCountrySettings();
+    updateGlobalCalendarSystem();
 
-         function changeLanguage(lang) {
-            const t = translations[lang];
-            if (!t) return;
-            
-            // Direct text replacement approach
-            const textReplacements = {
-                "Learner's Name": t.learnerName,
-                "Teacher's Name": t.teacherName,
-                "Country/Region": t.countryRegion,
-                "Calendar System": t.calendarSystem,
-                "School Year Start": t.schoolYearStart,
-                "Academic Year": t.academicYear,
-                "Grade Level": t.gradeLevel,
-                "Language Interface": t.interfaceLanguage
-            };
-            
-            // Find and replace text in all elements
-            document.querySelectorAll('*').forEach(element => {
-                // Only check text nodes, not nested elements
-                if (element.children.length === 0) {
-                    const text = element.textContent.trim();
-                    if (textReplacements[text]) {
-                        element.textContent = textReplacements[text];
-                    }
+    // Load auto-saved data first, fallback to template
+    const autoSaveLoaded = loadAutoSavedData();
+    if (!autoSaveLoaded) {
+        const savedTemplate = localStorage.getItem('eduflow_template');
+        if (savedTemplate) {
+            try {
+                const data = JSON.parse(savedTemplate);
+                if (data.learnerName) document.getElementById('learnerName').value = data.learnerName;
+                if (data.teacherName) document.getElementById('teacherName').value = data.teacherName;
+                if (data.planningData) {
+                    if (data.planningData.learningGoals) document.getElementById('learningGoals').value = data.planningData.learningGoals;
+                    if (data.planningData.prerequisites) document.getElementById('prerequisites').value = data.planningData.prerequisites;
+                    if (data.planningData.teachingNotes) document.getElementById('teachingNotes').value = data.planningData.teachingNotes;
+                    if (data.planningData.mappingInsights) document.getElementById('mappingInsights').value = data.planningData.mappingInsights;
                 }
-            });
-            
-            // Also try labels specifically
-            document.querySelectorAll('label').forEach(label => {
-                const text = label.textContent.trim();
-                if (textReplacements[text]) {
-                    label.textContent = textReplacements[text];
-                }
-            });
-            
-            localStorage.setItem('selectedLanguage', lang);
+            } catch (e) {
+                console.log('Could not load saved template');
+            }
         }
+    }
 
-        // Load saved language on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-            const select = document.getElementById('globalInterfaceLanguage');
-            if (select) {
-                select.value = savedLang;
-                changeLanguage(savedLang);
-            }
-        });
-// Load all saved data when the page loads
-window.addEventListener("load", () => {
-    loadAutoSavedData();
+    // Initialize interconnected data and headers
+    updateAllSections();
+    addHeaderUpdateListeners();
+
+    // Setup auto-save
+    setupAutoSaveListeners();
+    createSaveIndicator();
+
+    // Update header info after data is loaded
+    setTimeout(() => {
+        updateHeaderInfo();
+        updateSubjectTitle();
+    }, 100);
+
+    // Load saved language
+    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    const selectLang = document.getElementById('globalInterfaceLanguage');
+    if (selectLang) {
+        selectLang.value = savedLang;
+        changeLanguage(savedLang);
+    }
+
+    // Restore progress matrix charts
+    restoreProgressMatrix();
+});
+
+// Close modals when clicking outside
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+    }
 });
     </script>
 </body>
