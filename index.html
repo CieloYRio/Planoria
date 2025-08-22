@@ -1557,25 +1557,35 @@ function showView(viewId) {
     document.getElementById(viewId).classList.add('active');
 }
 
-        function setupAutoSaveListeners() {
-            // Only add listeners to table elements and planning fields
-            // Avoid conflicts with name fields
-            document.addEventListener('input', function(e) {
-                if (e.target.matches('textarea') && 
-                    e.target.closest('#monthlyPlanTable, #weeklyPlanTable, #scheduleTable')) {
-                    triggerAutoSave();
-                }
-            });
-            
-            document.addEventListener('change', function(e) {
-                if (e.target.matches('input, textarea, select') && 
-                    !['learnerName', 'teacherName'].includes(e.target.id) &&
-                    (e.target.closest('#monthlyPlanTable, #weeklyPlanTable, #scheduleTable') || 
-                     ['learningGoals', 'prerequisites', 'teachingNotes', 'mappingInsights'].includes(e.target.id))) {
-                    triggerAutoSave();
-                }
-            });
+     function setupAutoSaveListeners() {
+    // Listen for typing inside the main tables (monthly, weekly, daily)
+    document.addEventListener('input', function(e) {
+        if (
+            e.target.matches('textarea, input') && 
+            e.target.closest('#monthlyPlanTable, #weeklyPlanTable, #scheduleTable')
+        ) {
+            triggerAutoSave();
         }
+    });
+
+    // Listen for changes (like dropdowns or blur) in planning + extra fields
+    document.addEventListener('change', function(e) {
+        if (
+            e.target.matches('input, textarea, select') && 
+            !['learnerName', 'teacherName'].includes(e.target.id) && 
+            (
+                e.target.closest('#monthlyPlanTable, #weeklyPlanTable, #scheduleTable') || 
+                ['learningGoals', 'prerequisites', 'teachingNotes', 'mappingInsights'].includes(e.target.id)
+            )
+        ) {
+            triggerAutoSave();
+        }
+    });
+}
+
+// ✅ Ensure listeners are reattached whenever view/tab is switched
+document.addEventListener('DOMContentLoaded', setupAutoSaveListeners);
+
 
         // Global curriculum data
         let globalCurricula = {
