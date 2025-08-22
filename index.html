@@ -1399,90 +1399,11 @@
             }
         }
 
-// Save progress matrix
-function saveProgressMatrix() {
-    const table = document.getElementById("scheduleTable");
-    const progressData = [];
-
-    table.querySelectorAll("tr").forEach(row => {
-        const select = row.querySelector(".progress-matrix");
-        progressData.push(select ? select.value : "");
-    });
-
-    let savedData = JSON.parse(localStorage.getItem('eduflow_autosave')) || {};
-    savedData.tableData = savedData.tableData || {};
-    savedData.tableData.schedule = savedData.tableData.schedule || {};
-    savedData.tableData.schedule.progress = progressData;
-
-    localStorage.setItem('eduflow_autosave', JSON.stringify(savedData));
-
-    // Update visual metric if dashboard exists
-    updateProgressChart();
-}
-
-// Restore progress matrix
-function restoreProgressMatrix() {
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
-    if (savedData?.tableData?.schedule?.progress) {
-        const table = document.getElementById("scheduleTable");
-        table.querySelectorAll("tr").forEach((row, i) => {
-            const select = row.querySelector(".progress-matrix");
-            if (select) select.value = savedData.tableData.schedule.progress[i] || "";
-        });
-    }
-
-    // Update visual metric if dashboard exists
-    updateProgressChart();
-
-    let overviewProgressChart = null;
-
-function updateOverviewProgressChart() {
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
-    if (!savedData?.tableData?.schedule?.progress) return;
-
-    const progressArray = savedData.tableData.schedule.progress.map(p => {
-        const val = parseInt(p);
-        return isNaN(val) ? 0 : val;
-    });
-
-    const totalSlots = progressArray.length;
-    const completedSlots = progressArray.filter(v => v === 100).length;
-    const aggregate = totalSlots ? Math.round((completedSlots / totalSlots) * 100) : 0;
-
-    const data = {
-        labels: ['Completed', 'Remaining'],
-        datasets: [{
-            data: [aggregate, 100 - aggregate],
-            backgroundColor: ['#10B981', '#E5E7EB'],
-            borderWidth: 0
-        }]
-    };
-
-    const config = {
-        type: 'doughnut',
-        data: data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
-    };
-
-    if (!overviewProgressChart) {
-        const ctx = document.getElementById('overviewProgressChart').getContext('2d');
-        overviewProgressChart = new Chart(ctx, config);
-    } else {
-        overviewProgressChart.data = data;
-        overviewProgressChart.update();
-    }
-}
-
 // ------------------- Progress Tab Charts -------------------
 let progressTabChart = null;       // Pie chart for Student Progress
 let progressMatrixChart = null;    // Bar chart for Subject Progress
 
-// ------------------- Save & Restore Progress Matrix -----------------
+// ------------------- Save Progress Matrix -----------------
 function saveProgressMatrix() {
     const table = document.getElementById("scheduleTable");
     const progressData = [];
@@ -1503,6 +1424,7 @@ function saveProgressMatrix() {
     refreshProgressTab();
 }
 
+// ------------------- Restore Progress Matrix -----------------
 function restoreProgressMatrix() {
     const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
     if (savedData?.tableData?.schedule?.progress) {
@@ -1529,10 +1451,18 @@ function updateProgressTabChart() {
 
     const data = {
         labels: ['Completed', 'Remaining'],
-        datasets: [{ data: [aggregate, 100 - aggregate], backgroundColor: ['#10B981', '#E5E7EB'], borderWidth: 0 }]
+        datasets: [{
+            data: [aggregate, 100 - aggregate],
+            backgroundColor: ['#10B981', '#E5E7EB'],
+            borderWidth: 0
+        }]
     };
 
-    const config = { type: 'doughnut', data: data, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } };
+    const config = {
+        type: 'doughnut',
+        data: data,
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    };
 
     const ctx = document.getElementById('progressTabChart').getContext('2d');
     if (!progressTabChart) {
@@ -1553,10 +1483,18 @@ function updateProgressMatrixChart() {
 
     const data = {
         labels: labels,
-        datasets: [{ label: 'Progress %', data: dataSet, backgroundColor: '#3B82F6' }]
+        datasets: [{
+            label: 'Progress %',
+            data: dataSet,
+            backgroundColor: '#3B82F6'
+        }]
     };
 
-    const config = { type: 'bar', data: data, options: { indexAxis: 'y', responsive: true, scales: { x: { min: 0, max: 100 } } } };
+    const config = {
+        type: 'bar',
+        data: data,
+        options: { indexAxis: 'y', responsive: true, scales: { x: { min: 0, max: 100 } } }
+    };
 
     const ctx = document.getElementById('progressMatrixChart').getContext('2d');
     if (!progressMatrixChart) {
@@ -1611,6 +1549,12 @@ function setupAutoSaveListeners() {
             triggerAutoSave();
         }
     });
+}
+
+// ------------------- Tab Switching Function -----------------
+function showView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
 }
 
         function setupAutoSaveListeners() {
