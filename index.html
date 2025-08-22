@@ -1544,20 +1544,6 @@ window.addEventListener('load', () => {
 
 // ------------------- AutoSave Listener -----------------
 function setupAutoSaveListeners() {
-    document.addEventListener('input', function(e) {
-        if (e.target.matches('textarea') && e.target.closest('#monthlyPlanTable, #weeklyPlanTable, #scheduleTable')) {
-            triggerAutoSave();
-        }
-    });
-}
-
-// ------------------- Tab Switching Function -----------------
-function showView(viewId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
-}
-
-     function setupAutoSaveListeners() {
     // Listen for typing inside the main tables (monthly, weekly, daily)
     document.addEventListener('input', function(e) {
         if (
@@ -1583,9 +1569,11 @@ function showView(viewId) {
     });
 }
 
-// ✅ Ensure listeners are reattached whenever view/tab is switched
-document.addEventListener('DOMContentLoaded', setupAutoSaveListeners);
-
+// ------------------- Tab Switching Function -----------------
+function showView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+}
 
         // Global curriculum data
         let globalCurricula = {
