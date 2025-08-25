@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> data-i18n=EduFlow Planner - Smart Curriculum Design</title>
+    <title> data-i18n=CurriCrafter Planner - Smart Curriculum Design</title>
     <style>
         * {
             margin: 0;
@@ -543,7 +543,7 @@
 <body>
      <div class="header">
   <h1>
-    <span class="emoji">📒</span> EduFlow Planner
+    <span class="emoji">📒</span> CurriCrafter Planner
   </h1>
   <p id="headerSubtitle">Smart Curriculum Design for Modern Educators</p>
 </div>
@@ -1244,7 +1244,7 @@
             };
             
             try {
-                localStorage.setItem('eduflow_autosave', JSON.stringify(appData));
+                localStorage.setItem('curricrafter_autosave', JSON.stringify(appData));
                 lastSaveTime = new Date();
                 showSaveIndicator('✅ Saved', 'rgba(16, 185, 129, 0.95)');
                 console.log('Auto-saved at:', lastSaveTime.toLocaleTimeString());
@@ -1351,7 +1351,7 @@
 
         function loadAutoSavedData() {
             try {
-                const savedData = localStorage.getItem('eduflow_autosave');
+                const savedData = localStorage.getItem('curricrafter_autosave');
                 if (!savedData) return false;
                 
                 const data = JSON.parse(savedData);
@@ -1413,12 +1413,12 @@ function saveProgressMatrix() {
         progressData.push(select ? select.value : "");
     });
 
-    let savedData = JSON.parse(localStorage.getItem('eduflow_autosave')) || {};
+    let savedData = JSON.parse(localStorage.getItem('curricrafter_autosave')) || {};
     savedData.tableData = savedData.tableData || {};
     savedData.tableData.schedule = savedData.tableData.schedule || {};
     savedData.tableData.schedule.progress = progressData;
 
-    localStorage.setItem('eduflow_autosave', JSON.stringify(savedData));
+    localStorage.setItem('curricrafter_autosave', JSON.stringify(savedData));
 
     // Refresh visuals after saving
     refreshProgressTab();
@@ -1426,7 +1426,7 @@ function saveProgressMatrix() {
 
 // ------------------- Restore Progress Matrix -----------------
 function restoreProgressMatrix() {
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    const savedData = JSON.parse(localStorage.getItem('curricrafter_autosave'));
     if (savedData?.tableData?.schedule?.progress) {
         const table = document.getElementById("scheduleTable");
         table.querySelectorAll("tr").forEach((row, i) => {
@@ -1441,7 +1441,7 @@ function restoreProgressMatrix() {
 
 // ------------------- Student Pie Chart -----------------
 function updateProgressTabChart() {
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    const savedData = JSON.parse(localStorage.getItem('curricrafter_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
 
     const progressArray = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
@@ -1475,7 +1475,7 @@ function updateProgressTabChart() {
 
 // ------------------- Progress Matrix Bar Chart -----------------
 function updateProgressMatrixChart() {
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    const savedData = JSON.parse(localStorage.getItem('curricrafter_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
 
     const labels = savedData.lessons?.map(l => l.name) || [];
@@ -1510,7 +1510,7 @@ function updateMilestones() {
     const container = document.getElementById('milestones');
     container.innerHTML = '';
 
-    const savedData = JSON.parse(localStorage.getItem('eduflow_autosave'));
+    const savedData = JSON.parse(localStorage.getItem('curricrafter_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
 
     const progressArray = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
@@ -2705,7 +2705,7 @@ function showView(viewId) {
         }
 
         // Track completed weeks
-        let completedWeeks = JSON.parse(localStorage.getItem('eduflow_completed_weeks') || '[]');
+        let completedWeeks = JSON.parse(localStorage.getItem('curricrafter_completed_weeks') || '[]');
 
         function markWeekComplete() {
             const weeklyTable = document.getElementById('weeklyPlanTable');
@@ -2775,7 +2775,7 @@ function showView(viewId) {
             });
             
             // Save to localStorage
-            localStorage.setItem('eduflow_completed_weeks', JSON.stringify(completedWeeks));
+            localStorage.setItem('curricrafter_completed_weeks', JSON.stringify(completedWeeks));
             
             // Update milestone progress
             updateMilestoneProgress('weekly', 1);
@@ -2826,7 +2826,7 @@ function showView(viewId) {
             }
             
             // Save completion record
-            let completedDays = JSON.parse(localStorage.getItem('eduflow_completed_days') || '[]');
+            let completedDays = JSON.parse(localStorage.getItem('curricrafter_completed_days') || '[]');
             const dayId = `${currentDay}_${scheduleDate}`;
             
             // Remove existing record for this day
@@ -2841,7 +2841,7 @@ function showView(viewId) {
                 filledSlots: filledSlots
             });
             
-            localStorage.setItem('eduflow_completed_days', JSON.stringify(completedDays));
+            localStorage.setItem('curricrafter_completed_days', JSON.stringify(completedDays));
             
             alert(`🎉 ${currentDay.charAt(0).toUpperCase() + currentDay.slice(1)} Schedule Complete!\n\n✅ ${filledSlots} time slots completed\n📅 Date: ${scheduleDate}\n🏆 Progress tracked\n\nExcellent work on your daily planning!`);
            
@@ -3232,7 +3232,7 @@ function showView(viewId) {
             ];
             
             // Check if we have saved milestones and merge any custom ones
-            const savedMilestones = JSON.parse(localStorage.getItem('eduflow_milestones') || '[]');
+            const savedMilestones = JSON.parse(localStorage.getItem('curricrafter_milestones') || '[]');
             const customMilestones = savedMilestones.filter(m => m.type === 'custom' || !m.autoTrack);
             
             // Add custom milestones to the default auto-tracking ones
@@ -3283,7 +3283,7 @@ function showView(viewId) {
             });
             
             // FORCE SAVE: Always save updated milestones
-            localStorage.setItem('eduflow_milestones', JSON.stringify(milestones));
+            localStorage.setItem('curricrafter_milestones', JSON.stringify(milestones));
             console.log('💾 Milestones force-saved to localStorage');
             
             container.innerHTML = '';
@@ -3353,7 +3353,7 @@ function showView(viewId) {
             });
             
             // Save updated milestones
-            localStorage.setItem('eduflow_milestones', JSON.stringify(milestones));
+            localStorage.setItem('curricrafter_milestones', JSON.stringify(milestones));
         }
 
         // Helper functions for milestone tracking
@@ -3458,7 +3458,7 @@ function showView(viewId) {
         }
 
         function getDaysUsed() {
-            const savedData = localStorage.getItem('eduflow_autosave');
+            const savedData = localStorage.getItem('curricrafter_autosave');
             if (!savedData) return 0;
             
             try {
@@ -3474,12 +3474,12 @@ function showView(viewId) {
         }
 
         function markMilestoneComplete(id) {
-            let milestones = JSON.parse(localStorage.getItem('eduflow_milestones') || '[]');
+            let milestones = JSON.parse(localStorage.getItem('curricrafter_milestones') || '[]');
             const milestone = milestones.find(m => m.id === id);
             if (milestone) {
                 milestone.achieved = true;
                 milestone.current = milestone.target;
-                localStorage.setItem('eduflow_milestones', JSON.stringify(milestones));
+                localStorage.setItem('curricrafter_milestones', JSON.stringify(milestones));
                 loadMilestones();
                 
                 // Show celebration
@@ -3497,7 +3497,7 @@ function showView(viewId) {
             const target = parseInt(prompt('Enter target number:'));
             if (!target || target <= 0) return;
             
-            const milestones = JSON.parse(localStorage.getItem('eduflow_milestones') || '[]');
+            const milestones = JSON.parse(localStorage.getItem('curricrafter_milestones') || '[]');
             const newMilestone = {
                 id: Date.now(),
                 title,
@@ -3509,28 +3509,28 @@ function showView(viewId) {
             };
             
             milestones.push(newMilestone);
-            localStorage.setItem('eduflow_milestones', JSON.stringify(milestones));
+            localStorage.setItem('curricrafter_milestones', JSON.stringify(milestones));
             loadMilestones();
         }
 
         function deleteMilestone(id) {
             if (confirm('Are you sure you want to delete this milestone?')) {
-                let milestones = JSON.parse(localStorage.getItem('eduflow_milestones') || '[]');
+                let milestones = JSON.parse(localStorage.getItem('curricrafter_milestones') || '[]');
                 milestones = milestones.filter(m => m.id !== id);
-                localStorage.setItem('eduflow_milestones', JSON.stringify(milestones));
+                localStorage.setItem('curricrafter_milestones', JSON.stringify(milestones));
                 loadMilestones();
             }
         }
 
         function updateMilestoneProgress(type, increment = 1) {
-            let milestones = JSON.parse(localStorage.getItem('eduflow_milestones') || '[]');
+            let milestones = JSON.parse(localStorage.getItem('curricrafter_milestones') || '[]');
             milestones.forEach(milestone => {
                 if (milestone.type === type && !milestone.achieved) {
                     milestone.current = Math.min(milestone.target, milestone.current + increment);
                     milestone.achieved = milestone.current >= milestone.target;
                 }
             });
-            localStorage.setItem('eduflow_milestones', JSON.stringify(milestones));
+            localStorage.setItem('curricrafter_milestones', JSON.stringify(milestones));
         }
 
         function updateOverviewStats() {
@@ -3562,7 +3562,7 @@ function showView(viewId) {
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>EduFlow Curriculum Plan - ${learnerName}</title>
+                    <title>CurriCrafter Curriculum Plan - ${learnerName}</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.4; }
                         .header { text-align: center; margin-bottom: 30px; padding: 20px; background: #f0f9ff; border-radius: 8px; }
@@ -3585,7 +3585,7 @@ function showView(viewId) {
                 </head>
                 <body>
                     <div class="header">
-                        <h1>📖 EduFlow Curriculum Plan</h1>
+                        <h1>📖 CurriCrafter Curriculum Plan</h1>
                         <p>Smart Curriculum Design for Modern Educators</p>
                     </div>
                     
@@ -3650,8 +3650,8 @@ function showView(viewId) {
                     </div>
                     
                     <div class="footer">
-                        <p>Generated by EduFlow Planner on ${new Date().toLocaleDateString()}</p>
-                        <p>© ${new Date().getFullYear()} EduFlow - Smart Curriculum Design</p>
+                        <p>Generated by CurriCrafter Planner on ${new Date().toLocaleDateString()}</p>
+                        <p>© ${new Date().getFullYear()} CurriCrafter - Smart Curriculum Design</p>
                     </div>
                 </body>
                 </html>
@@ -3662,7 +3662,7 @@ function showView(viewId) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `EduFlow_Curriculum_${learnerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
+            link.download = `CurriCrafter_Curriculum_${learnerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -3763,7 +3763,7 @@ function showView(viewId) {
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>EduFlow - ${title}</title>
+                    <title>CurriCrafter - ${title}</title>
                     <style>
                         * { box-sizing: border-box; }
                         body { 
@@ -3941,7 +3941,7 @@ function showView(viewId) {
                         ${contentToPrint}
                     </div>
                     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 0.9rem; color: #6b7280; text-align: center;">
-                        <p>Generated by EduFlow Planner on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                        <p>Generated by CurriCrafter Planner on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
                     </div>
                 </body>
                 </html>
@@ -3977,7 +3977,7 @@ function showView(viewId) {
             };
             
             // Save to localStorage
-            localStorage.setItem('eduflow_template', JSON.stringify(templateData));
+            localStorage.setItem('curricrafter_template', JSON.stringify(templateData));
             alert('💾 Template Saved Successfully!\n\nYour curriculum template has been saved locally. You can restore it anytime by refreshing the page.');
         }
 
@@ -4318,8 +4318,8 @@ function showView(viewId) {
                     </div>
                     
                     <div class="footer">
-                        <p>Generated by EduFlow Planner on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-                        <p>© ${new Date().getFullYear()} EduFlow - Smart Curriculum Design</p>
+                        <p>Generated by CurriCrafter Planner on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                        <p>© ${new Date().getFullYear()} CurriCrafter - Smart Curriculum Design</p>
                     </div>
                 </body>
                 </html>
@@ -4450,7 +4450,7 @@ function showView(viewId) {
     // Load auto-saved data first, fallback to template
     const autoSaveLoaded = loadAutoSavedData();
     if (!autoSaveLoaded) {
-        const savedTemplate = localStorage.getItem('eduflow_template');
+        const savedTemplate = localStorage.getItem('curricrafter_template');
         if (savedTemplate) {
             try {
                 const data = JSON.parse(savedTemplate);
@@ -4502,7 +4502,7 @@ document.addEventListener('click', function(event) {
 });
         // ------------------- UNIFIED AUTO-SAVE & RESTORE -----------------
 (function() {
-    const LOCAL_STORAGE_KEY = 'eduflow_data';
+    const LOCAL_STORAGE_KEY = 'curricrafter_data';
 
     // ------------------- Save all data -----------------
     function saveAllData() {
@@ -4516,10 +4516,10 @@ document.addEventListener('click', function(event) {
             curriculumPeriodWise: getTableData('curriculumPeriodTable'),
             dailySchedule: getDailyScheduleData(),
             progressMatrix: getProgressMatrixData(),
-            template: localStorage.getItem('eduflow_template') || ''
+            template: localStorage.getItem('curricrafter_template') || ''
         };
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-        console.log('✅ EduFlow: Data saved');
+        console.log('✅ CurriCrafter: Data saved');
     }
 
     // ------------------- Restore all data -----------------
@@ -4542,12 +4542,12 @@ document.addEventListener('click', function(event) {
             if (data.dailySchedule) restoreDailySchedule(data.dailySchedule);
             if (data.progressMatrix) restoreProgressMatrix(data.progressMatrix);
 
-            if (data.template) localStorage.setItem('eduflow_template', JSON.stringify(data.template));
+            if (data.template) localStorage.setItem('curricrafter_template', JSON.stringify(data.template));
 
-            console.log('✅ EduFlow: Data restored');
+            console.log('✅ CurriCrafter: Data restored');
             return true;
         } catch (e) {
-            console.error('❌ EduFlow: Failed to restore data', e);
+            console.error('❌ CurriCrafter: Failed to restore data', e);
             return false;
         }
     }
