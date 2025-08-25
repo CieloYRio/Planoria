@@ -1235,9 +1235,9 @@
                     subjectFocus: document.getElementById('subjectFocus')?.value || 'unit'
                 },
                 tableData: {
-                    monthlyPlan: getTableData('monthlyPlanTable'),
-                    weeklyPlan: getTableData('weeklyPlanTable'),
-                    schedule: getTableData('scheduleTable')
+                    monthlyPlan: getEnhancedTableData('monthlyPlanTable'),
+                    weeklyPlan: getEnhancedTableData('weeklyPlanTable'),
+                    schedule: getEnhancedTableData('scheduleTable')
                 },
                 timestamp: new Date().toISOString(),
                 version: '2.0'
@@ -1333,6 +1333,150 @@
             });
         }
 
+        // ------------------- Enhanced Table Data System with Unique IDs -----------------
+        function getEnhancedTableData(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return { rows: [], structure: null };
+            
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return { rows: [], structure: null };
+            
+            const rows = [];
+            tbody.querySelectorAll('tr').forEach((row, rowIndex) => {
+                // Ensure each row has a unique ID
+                if (!row.dataset.rowId) {
+                    row.dataset.rowId = `${tableId}_row_${Date.now()}_${rowIndex}`;
+                }
+                
+                const rowData = {
+                    id: row.dataset.rowId,
+                    cells: []
+                };
+                
+                row.querySelectorAll('td').forEach((cell, cellIndex) => {
+                    const cellData = {
+                        index: cellIndex,
+                        content: null,
+                        type: 'text'
+                    };
+                    
+                    const input = cell.querySelector('input');
+                    const textarea = cell.querySelector('textarea');
+                    const select = cell.querySelector('select');
+                    
+                    if (input) {
+                        cellData.content = input.value;
+                        cellData.type = input.type || 'text';
+                        cellData.placeholder = input.placeholder || '';
+                    } else if (textarea) {
+                        cellData.content = textarea.value;
+                        cellData.type = 'textarea';
+                        cellData.placeholder = textarea.placeholder || '';
+                    } else if (select) {
+                        cellData.content = select.value;
+                        cellData.type = 'select';
+                        cellData.options = Array.from(select.options).map(option => ({
+                            value: option.value,
+                            text: option.textContent,
+                            selected: option.selected
+                        }));
+                    } else {
+                        cellData.content = cell.textContent.trim();
+                        cellData.type = 'text';
+                    }
+                    
+                    rowData.cells.push(cellData);
+                });
+                
+                if (rowData.cells.length > 0) {
+                    rows.push(rowData);
+                }
+            });
+            
+            return { 
+                tableId: tableId,
+                rows: rows, 
+                timestamp: new Date().toISOString()
+            };
+        }
+        
+        function restoreEnhancedTableData(tableId, tableData) {
+            const table = document.getElementById(tableId);
+            if (!table || !tableData || !tableData.rows || tableData.rows.length === 0) return false;
+            
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return false;
+            
+            // Store current structure for reference
+            const currentRowCount = tbody.querySelectorAll('tr').length;
+            
+            // If table is empty or has fewer rows than data, we need to add rows first
+            while (tbody.querySelectorAll('tr').length < tableData.rows.length) {
+                if (tableId === 'scheduleTable') {
+                    addTimeSlot('');
+                } else if (tableId === 'monthlyPlanTable') {
+                    addMonthlyRow('', '');
+                } else if (tableId === 'weeklyPlanTable') {
+                    addSubjectRow('', '');
+                } else {
+                    // Generic row addition for other tables
+                    const newRow = document.createElement('tr');
+                    const cellCount = tableData.rows[0]?.cells.length || 1;
+                    for (let i = 0; i < cellCount; i++) {
+                        const cell = document.createElement('td');
+                        newRow.appendChild(cell);
+                    }
+                    tbody.appendChild(newRow);
+                }
+            }
+            
+            // Now restore data to rows
+            const rows = tbody.querySelectorAll('tr');
+            tableData.rows.forEach((savedRow, index) => {
+                if (index >= rows.length) return; // Safety check
+                
+                const currentRow = rows[index];
+                currentRow.dataset.rowId = savedRow.id; // Restore row ID
+                
+                const cells = currentRow.querySelectorAll('td');
+                savedRow.cells.forEach((savedCell, cellIndex) => {
+                    if (cellIndex >= cells.length) return; // Safety check
+                    
+                    const currentCell = cells[cellIndex];
+                    
+                    if (savedCell.type === 'select') {
+                        const select = currentCell.querySelector('select');
+                        if (select && savedCell.content) {
+                            select.value = savedCell.content;
+                            // Trigger change event to update any dependent elements
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (savedCell.type === 'textarea') {
+                        const textarea = currentCell.querySelector('textarea');
+                        if (textarea && savedCell.content !== null) {
+                            textarea.value = savedCell.content;
+                        }
+                    } else if (savedCell.type === 'text' || savedCell.type.startsWith('text')) {
+                        const input = currentCell.querySelector('input');
+                        if (input && savedCell.content !== null) {
+                            input.value = savedCell.content;
+                        }
+                    } else {
+                        // Fallback for other cell types
+                        const input = currentCell.querySelector('input, textarea, select');
+                        if (input && savedCell.content !== null) {
+                            input.value = savedCell.content;
+                            if (input.tagName.toLowerCase() === 'select') {
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    }
+                });
+            });
+            
+            return true;
+        }
+
         function triggerAutoSave() {
     // Clear existing timer
     if (autoSaveTimer) {
@@ -1381,11 +1525,17 @@
                 }
                 
                 // Restore table data
+                // Restore table data with enhanced system
                 if (data.tableData) {
                     setTimeout(() => {
-                        if (data.tableData.monthlyPlan) restoreTableData('monthlyPlanTable', data.tableData.monthlyPlan);
-                        if (data.tableData.weeklyPlan) restoreTableData('weeklyPlanTable', data.tableData.weeklyPlan);
-                        if (data.tableData.schedule) restoreTableData('scheduleTable', data.tableData.schedule);
+                        if (data.tableData.monthlyPlan) restoreEnhancedTableData('monthlyPlanTable', data.tableData.monthlyPlan);
+                        if (data.tableData.weeklyPlan) restoreEnhancedTableData('weeklyPlanTable', data.tableData.weeklyPlan);
+                        if (data.tableData.schedule) restoreEnhancedTableData('scheduleTable', data.tableData.schedule);
+                        
+                        // Trigger chart updates after table data is restored
+                        setTimeout(() => {
+                            refreshProgressTab();
+                        }, 100);
                     }, 500);
                 }
                 
