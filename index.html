@@ -1338,11 +1338,18 @@
             const table = document.getElementById(tableId);
             if (!table) return { rows: [], structure: null };
             
-            const tbody = table.querySelector('tbody');
-            if (!tbody) return { rows: [], structure: null };
+            // Try to find tbody first, then fall back to direct table rows
+            let container = table.querySelector('tbody');
+            if (!container) {
+                container = table;
+            }
             
             const rows = [];
-            tbody.querySelectorAll('tr').forEach((row, rowIndex) => {
+            // Get all tr elements that contain td (not th) to avoid header rows
+            const dataRows = container.querySelectorAll('tr');
+            const actualDataRows = Array.from(dataRows).filter(row => row.querySelectorAll('td').length > 0);
+            
+            actualDataRows.forEach((row, rowIndex) => {
                 // Ensure each row has a unique ID
                 if (!row.dataset.rowId) {
                     row.dataset.rowId = `${tableId}_row_${Date.now()}_${rowIndex}`;
@@ -1404,14 +1411,17 @@
             const table = document.getElementById(tableId);
             if (!table || !tableData || !tableData.rows || tableData.rows.length === 0) return false;
             
-            const tbody = table.querySelector('tbody');
-            if (!tbody) return false;
+            // Try to find tbody first, then fall back to direct table
+            let container = table.querySelector('tbody');
+            if (!container) {
+                container = table;
+            }
             
-            // Store current structure for reference
-            const currentRowCount = tbody.querySelectorAll('tr').length;
+            // Get current data rows (exclude header rows)
+            const currentDataRows = Array.from(container.querySelectorAll('tr')).filter(row => row.querySelectorAll('td').length > 0);
             
             // If table is empty or has fewer rows than data, we need to add rows first
-            while (tbody.querySelectorAll('tr').length < tableData.rows.length) {
+            while (currentDataRows.length < tableData.rows.length) {
                 if (tableId === 'scheduleTable') {
                     addTimeSlot('');
                 } else if (tableId === 'monthlyPlanTable') {
@@ -1426,12 +1436,15 @@
                         const cell = document.createElement('td');
                         newRow.appendChild(cell);
                     }
-                    tbody.appendChild(newRow);
+                    container.appendChild(newRow);
                 }
+                
+                // Update the current rows list
+                currentDataRows.length = Array.from(container.querySelectorAll('tr')).filter(row => row.querySelectorAll('td').length > 0).length;
             }
             
             // Now restore data to rows
-            const rows = tbody.querySelectorAll('tr');
+            const rows = Array.from(container.querySelectorAll('tr')).filter(row => row.querySelectorAll('td').length > 0);
             tableData.rows.forEach((savedRow, index) => {
                 if (index >= rows.length) return; // Safety check
                 
