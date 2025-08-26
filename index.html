@@ -546,6 +546,12 @@
     <span class="emoji">📒</span> CurriCrafter Planner
   </h1>
   <p id="headerSubtitle">Smart Curriculum Design for Modern Educators</p>
+  <div style="margin-top: 15px; padding: 12px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; text-align: center; font-size: 0.85rem;">
+    <span style="margin-right: 8px;">⚖️</span>
+    <span data-i18n="legalNotice">This tool was developed with AI assistance. Please review our</span>
+    <a href="#" onclick="showLegalDisclaimer()" style="color: #1e40af; text-decoration: underline; font-weight: 500;" data-i18n="legalDisclaimerLink">Legal Disclaimer</a>
+    <span data-i18n="legalNoticeEnd">regarding AI usage, user responsibility, and limitations.</span>
+  </div>
 </div>
     
        <!-- Participant Information Section -->
@@ -559,15 +565,15 @@
     ">
         <!-- Row 1 -->
         <div class="form-group" style="margin-bottom: 0;">
-            <label for="learnerName" style="font-size: 0.9rem; color: #374151; margin-bottom: 6px;">👨‍🎓 Learner's Name</label>
+            <label for="learnerName" style="font-size: 0.9rem; color: #374151; margin-bottom: 6px;" data-i18n="learnerName">👨‍🎓 Learner's Name</label>
             <input type="text" id="learnerName" class="form-control" placeholder="Enter learner's name" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(59, 130, 246, 0.3);">
         </div>
         <div class="form-group" style="margin-bottom: 0;">
-            <label for="teacherName" style="font-size: 0.9rem; color: #374151; margin-bottom: 6px;">👩‍🏫 Teacher's Name</label>
+            <label for="teacherName" style="font-size: 0.9rem; color: #374151; margin-bottom: 6px;" data-i18n="teacherName">👩‍🏫 Teacher's Name</label>
             <input type="text" id="teacherName" class="form-control" placeholder="Enter teacher's name" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(16, 185, 129, 0.3);">
         </div>
         <div class="form-group" style="margin-bottom: 0;">
-            <label for="schoolName" style="font-size: 0.9rem; color: #374151; margin-bottom: 6px;">🏫 School/Institution</label>
+            <label for="schoolName" style="font-size: 0.9rem; color: #374151; margin-bottom: 6px;" data-i18n="schoolName">🏫 School/Institution</label>
             <input type="text" id="schoolName" class="form-control" placeholder="Enter school/institution" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(16, 185, 129, 0.3);">
         </div>
 
@@ -586,11 +592,11 @@
 </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showView('overview')">📊 Overview</button>
-            <button class="nav-tab" onclick="showView('subjects')">📖 Subjects</button>
-            <button class="nav-tab" onclick="showView('planner')">📋 Curriculum Designer</button>
-            <button class="nav-tab" onclick="showView('schedule')">🕐 Daily Schedule</button>
-            <button class="nav-tab" onclick="showView('progress')">📈 Progress</button>
+            <button class="nav-tab active" onclick="showView('overview')" data-i18n="overview">📊 Overview</button>
+            <button class="nav-tab" onclick="showView('subjects')" data-i18n="subjects">📖 Subjects</button>
+            <button class="nav-tab" onclick="showView('planner')" data-i18n="curriculum">📋 Curriculum Designer</button>
+            <button class="nav-tab" onclick="showView('schedule')" data-i18n="schedule">🕐 Daily Schedule</button>
+            <button class="nav-tab" onclick="showView('progress')" data-i18n="progress">📈 Progress</button>
         </div>
 
         <div class="content">
@@ -738,7 +744,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="globalInterfaceLanguage">🌐 Interface Language</label>
+                            <label for="globalInterfaceLanguage" data-i18n="interfaceLanguage">🌐 Interface Language</label>
                             <select id="globalInterfaceLanguage" class="form-control">
                                 <option value="en">English</option>
                                 <option value="es">Español</option>
@@ -1153,6 +1159,307 @@
     </div>
 
     <script>
+        // =============== TRANSLATION SYSTEM ===============
+        const translations = {
+            'en': {
+                // Header and main navigation
+                'headerTitle': 'EduFlow Planner',
+                'headerSubtitle': 'Smart Curriculum Design for Modern Educators',
+                'legalNotice': 'This tool was developed with AI assistance. Please review our',
+                'legalDisclaimerLink': 'Legal Disclaimer',
+                'legalNoticeEnd': 'regarding AI usage, user responsibility, and limitations.',
+                
+                // Form labels
+                'learnerName': 'Learner\'s Name',
+                'teacherName': 'Teacher\'s Name',
+                'schoolName': 'School/Institution',
+                'gradeLevel': 'Grade Level',
+                'interfaceLanguage': 'Interface Language',
+                'countryRegion': 'Country/Region',
+                'calendarSystem': 'Calendar System',
+                'academicYear': 'Academic Year',
+                'schoolYearStart': 'School Year Start',
+                
+                // Navigation tabs
+                'overview': 'Overview',
+                'subjects': 'Subjects',
+                'curriculum': 'Curriculum Designer',
+                'lessons': 'Lessons',
+                'schedule': 'Daily Schedule',
+                'progress': 'Progress',
+                
+                // Common actions
+                'add': 'Add',
+                'edit': 'Edit',
+                'delete': 'Delete',
+                'save': 'Save',
+                'cancel': 'Cancel',
+                'export': 'Export',
+                'import': 'Import',
+                'clear': 'Clear',
+                
+                // Planning terms
+                'learningGoals': 'Learning Goals',
+                'prerequisites': 'Prerequisites',
+                'teachingNotes': 'Teaching Notes',
+                'crossCurricular': 'Cross-Curricular Connections',
+                'weeklyHours': 'Weekly Hours',
+                'overallProgress': 'Overall Progress %',
+                'totalSubjects': 'Total Subjects',
+                'totalLessons': 'Total Lessons'
+            },
+            'es': {
+                // Header and main navigation  
+                'headerTitle': 'Planificador EduFlow',
+                'headerSubtitle': 'Diseño Inteligente de Currículos para Educadores Modernos',
+                'legalNotice': 'Esta herramienta fue desarrollada con asistencia de IA. Por favor revise nuestro',
+                'legalDisclaimerLink': 'Aviso Legal',
+                'legalNoticeEnd': 'sobre el uso de IA, responsabilidad del usuario y limitaciones.',
+                
+                // Form labels
+                'learnerName': 'Nombre del Estudiante',
+                'teacherName': 'Nombre del Profesor',
+                'schoolName': 'Escuela/Institución',
+                'gradeLevel': 'Nivel de Grado',
+                'interfaceLanguage': 'Idioma de la Interfaz',
+                'countryRegion': 'País/Región',
+                'calendarSystem': 'Sistema de Calendario',
+                'academicYear': 'Año Académico',
+                'schoolYearStart': 'Inicio del Año Escolar',
+                
+                // Navigation tabs
+                'overview': 'Resumen',
+                'subjects': 'Materias',
+                'curriculum': 'Diseñador de Currículo',
+                'lessons': 'Lecciones',
+                'schedule': 'Horario Diario',
+                'progress': 'Progreso',
+                
+                // Common actions
+                'add': 'Agregar',
+                'edit': 'Editar',
+                'delete': 'Eliminar',
+                'save': 'Guardar',
+                'cancel': 'Cancelar',
+                'export': 'Exportar',
+                'import': 'Importar',
+                'clear': 'Limpiar',
+                
+                // Planning terms
+                'learningGoals': 'Objetivos de Aprendizaje',
+                'prerequisites': 'Prerrequisitos',
+                'teachingNotes': 'Notas de Enseñanza',
+                'crossCurricular': 'Conexiones Transversales',
+                'weeklyHours': 'Horas Semanales',
+                'overallProgress': 'Progreso General %',
+                'totalSubjects': 'Total de Materias',
+                'totalLessons': 'Total de Lecciones'
+            },
+            'fr': {
+                // Header and main navigation
+                'headerTitle': 'Planificateur EduFlow',
+                'headerSubtitle': 'Conception Intelligente de Curriculum pour Éducateurs Modernes',
+                'legalNotice': 'Cet outil a été développé avec l\'assistance de l\'IA. Veuillez consulter notre',
+                'legalDisclaimerLink': 'Avis Légal',
+                'legalNoticeEnd': 'concernant l\'utilisation de l\'IA, la responsabilité de l\'utilisateur et les limitations.',
+                
+                // Form labels
+                'learnerName': 'Nom de l\'Apprenant',
+                'teacherName': 'Nom du Professeur',
+                'schoolName': 'École/Institution',
+                'gradeLevel': 'Niveau de Classe',
+                'interfaceLanguage': 'Langue de l\'Interface',
+                'countryRegion': 'Pays/Région',
+                'calendarSystem': 'Système de Calendrier',
+                'academicYear': 'Année Académique',
+                'schoolYearStart': 'Début de l\'Année Scolaire',
+                
+                // Navigation tabs
+                'overview': 'Aperçu',
+                'subjects': 'Matières',
+                'curriculum': 'Concepteur de Curriculum',
+                'lessons': 'Leçons',
+                'schedule': 'Horaire Quotidien',
+                'progress': 'Progrès',
+                
+                // Common actions
+                'add': 'Ajouter',
+                'edit': 'Modifier',
+                'delete': 'Supprimer',
+                'save': 'Sauvegarder',
+                'cancel': 'Annuler',
+                'export': 'Exporter',
+                'import': 'Importer',
+                'clear': 'Effacer',
+                
+                // Planning terms
+                'learningGoals': 'Objectifs d\'Apprentissage',
+                'prerequisites': 'Prérequis',
+                'teachingNotes': 'Notes d\'Enseignement',
+                'crossCurricular': 'Connexions Transversales',
+                'weeklyHours': 'Heures Hebdomadaires',
+                'overallProgress': 'Progrès Global %',
+                'totalSubjects': 'Total des Matières',
+                'totalLessons': 'Total des Leçons'
+            },
+            'de': {
+                // Header and main navigation
+                'headerTitle': 'EduFlow Planer',
+                'headerSubtitle': 'Intelligente Curriculum-Gestaltung für Moderne Pädagogen',
+                'legalNotice': 'Dieses Tool wurde mit KI-Unterstützung entwickelt. Bitte überprüfen Sie unseren',
+                'legalDisclaimerLink': 'Rechtlichen Haftungsausschluss',
+                'legalNoticeEnd': 'bezüglich KI-Nutzung, Benutzerverantwortung und Einschränkungen.',
+                
+                // Form labels
+                'learnerName': 'Name des Lernenden',
+                'teacherName': 'Name der Lehrkraft',
+                'schoolName': 'Schule/Institution',
+                'gradeLevel': 'Klassenstufe',
+                'interfaceLanguage': 'Oberflächensprache',
+                'countryRegion': 'Land/Region',
+                'calendarSystem': 'Kalendersystem',
+                'academicYear': 'Schuljahr',
+                'schoolYearStart': 'Schuljahresbeginn',
+                
+                // Navigation tabs
+                'overview': 'Übersicht',
+                'subjects': 'Fächer',
+                'curriculum': 'Lehrplan-Designer',
+                'lessons': 'Unterricht',
+                'schedule': 'Tagesplan',
+                'progress': 'Fortschritt',
+                
+                // Common actions
+                'add': 'Hinzufügen',
+                'edit': 'Bearbeiten',
+                'delete': 'Löschen',
+                'save': 'Speichern',
+                'cancel': 'Abbrechen',
+                'export': 'Exportieren',
+                'import': 'Importieren',
+                'clear': 'Löschen',
+                
+                // Planning terms
+                'learningGoals': 'Lernziele',
+                'prerequisites': 'Voraussetzungen',
+                'teachingNotes': 'Unterrichtsnotizen',
+                'crossCurricular': 'Fächerübergreifende Verbindungen',
+                'weeklyHours': 'Wochenstunden',
+                'overallProgress': 'Gesamtfortschritt %',
+                'totalSubjects': 'Anzahl Fächer',
+                'totalLessons': 'Anzahl Stunden'
+            },
+            'zh': {
+                // Header and main navigation
+                'headerTitle': 'EduFlow 规划器',
+                'headerSubtitle': '现代教育者的智能课程设计',
+                'legalNotice': '此工具是在人工智能协助下开发的。请查看我们的',
+                'legalDisclaimerLink': '法律免责声明',
+                'legalNoticeEnd': '关于人工智能使用、用户责任和限制的说明。',
+                
+                // Form labels
+                'learnerName': '学习者姓名',
+                'teacherName': '教师姓名',
+                'schoolName': '学校/机构',
+                'gradeLevel': '年级水平',
+                'interfaceLanguage': '界面语言',
+                'countryRegion': '国家/地区',
+                'calendarSystem': '日历系统',
+                'academicYear': '学年',
+                'schoolYearStart': '学年开始',
+                
+                // Navigation tabs
+                'overview': '概览',
+                'subjects': '学科',
+                'curriculum': '课程设计器',
+                'lessons': '课时',
+                'schedule': '日程安排',
+                'progress': '进度',
+                
+                // Common actions
+                'add': '添加',
+                'edit': '编辑',
+                'delete': '删除',
+                'save': '保存',
+                'cancel': '取消',
+                'export': '导出',
+                'import': '导入',
+                'clear': '清除',
+                
+                // Planning terms
+                'learningGoals': '学习目标',
+                'prerequisites': '先决条件',
+                'teachingNotes': '教学笔记',
+                'crossCurricular': '跨学科联系',
+                'weeklyHours': '每周课时',
+                'overallProgress': '总体进度 %',
+                'totalSubjects': '总学科数',
+                'totalLessons': '总课时数'
+            }
+        };
+
+        // Translation function
+        function changeLanguage(langCode) {
+            const lang = translations[langCode] || translations['en'];
+            
+            // Update all elements with data-i18n attributes
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (lang[key]) {
+                    // Handle different element types
+                    if (element.tagName === 'INPUT' && element.type === 'text') {
+                        element.placeholder = lang[key];
+                    } else if (element.tagName === 'LABEL') {
+                        // Preserve any emoji or icons at the start
+                        const currentText = element.textContent;
+                        const emojiMatch = currentText.match(/^[\u{1F300}-\u{1F9FF}][\s]*/u);
+                        const emoji = emojiMatch ? emojiMatch[0] : '';
+                        element.textContent = emoji + lang[key];
+                    } else {
+                        element.textContent = lang[key];
+                    }
+                }
+            });
+            
+            // Update document title
+            if (lang['headerTitle']) {
+                document.title = lang['headerTitle'] + ' - Smart Curriculum Design';
+            }
+            
+            // Update header elements
+            const headerTitle = document.querySelector('.header h1');
+            if (headerTitle && lang['headerTitle']) {
+                headerTitle.innerHTML = '<span class="emoji">📒</span> ' + lang['headerTitle'];
+            }
+            
+            const headerSubtitle = document.getElementById('headerSubtitle');
+            if (headerSubtitle && lang['headerSubtitle']) {
+                // Keep the existing subtitle if it's the main one
+                if (headerSubtitle.textContent.includes('Smart Curriculum Design') || 
+                    headerSubtitle.textContent.includes('Diseño Inteligente') ||
+                    headerSubtitle.textContent.includes('Conception Intelligente') ||
+                    headerSubtitle.textContent.includes('Intelligente Curriculum') ||
+                    headerSubtitle.textContent.includes('智能课程设计')) {
+                    headerSubtitle.textContent = lang['headerSubtitle'];
+                }
+            }
+            
+            // Save language preference
+            localStorage.setItem('selectedLanguage', langCode);
+            
+            console.log(`Language changed to: ${langCode}`);
+        }
+
+        // Add language change handler to dropdown
+        function setupLanguageHandler() {
+            const langSelect = document.getElementById('globalInterfaceLanguage');
+            if (langSelect) {
+                langSelect.addEventListener('change', function() {
+                    changeLanguage(this.value);
+                });
+            }
+        }
+
         // Auto-save functionality
         let autoSaveTimer = null;
         let lastSaveTime = null;
@@ -1981,6 +2288,72 @@ function showView(viewId) {
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Legal disclaimer modal
+        function showLegalDisclaimer() {
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h2 style="margin-bottom: 20px; color: #1f2937;">⚖️ Legal Disclaimer & AI Development Notice</h2>
+                    
+                    <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                        <h3 style="margin-bottom: 10px; color: #92400e;">🤖 AI-Assisted Development</h3>
+                        <p style="margin-bottom: 10px; color: #451a03;">This software was developed with significant assistance from artificial intelligence tools:</p>
+                        <ul style="margin-left: 20px; color: #451a03;">
+                            <li><strong>CanvaAI</strong> - Design and user interface assistance</li>
+                            <li><strong>ChatGPT</strong> - Code generation and logic development</li>
+                            <li><strong>GitHub Copilot</strong> - Code completion and optimization</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+                        <h3 style="margin-bottom: 10px; color: #991b1b;">⚠️ User Responsibility</h3>
+                        <p style="color: #7f1d1d; line-height: 1.6;">
+                            <strong>You are solely responsible for:</strong><br>
+                            • Validating all educational content and curriculum plans<br>
+                            • Ensuring compliance with local educational standards<br>
+                            • Verifying accuracy of country-specific data<br>
+                            • Testing functionality before educational use<br>
+                            • Compliance with local privacy and educational regulations
+                        </p>
+                    </div>
+                    
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 10px; color: #374151;">🚫 Limitations & Disclaimers</h3>
+                        <p style="color: #4b5563; line-height: 1.6;">
+                            This software is provided "AS IS" without warranties. The developers make no guarantees about:
+                            accuracy of educational content, compliance with educational standards, or suitability for 
+                            any specific educational environment. AI-generated components require independent validation.
+                        </p>
+                    </div>
+                    
+                    <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0ea5e9;">
+                        <h3 style="margin-bottom: 10px; color: #0c4a6e;">🔒 Privacy & Data</h3>
+                        <p style="color: #0369a1; line-height: 1.6;">
+                            All data is stored locally in your browser. No personal or educational data is transmitted 
+                            to external servers. You are responsible for your own data security and backup.
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <p style="color: #6b7280; font-size: 0.9rem;">
+                            For complete licensing details, see the 
+                            <a href="https://github.com/CieloYRio/Planoria/blob/main/LICENSE" target="_blank" style="color: #1e40af;">LICENSE file</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close on outside click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
         }
 
         // Subject management
@@ -4645,13 +5018,16 @@ function showView(viewId) {
         updateSubjectTitle();
     }, 100);
 
-    // Load saved language
+    // Load saved language and setup handler
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
     const selectLang = document.getElementById('globalInterfaceLanguage');
     if (selectLang) {
         selectLang.value = savedLang;
         changeLanguage(savedLang);
     }
+    
+    // Setup language change handler
+    setupLanguageHandler();
 
     // Restore progress matrix charts
     restoreProgressMatrix();
