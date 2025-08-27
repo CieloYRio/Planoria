@@ -3530,14 +3530,48 @@ function showView(viewId) {
             alert(`✅ Generated ${focus} plan for ${subject.emoji} ${subject.name} (${grade})!\n\nPlanning Focus: ${focus}\nCalendar System: ${calendar}\n\nThe planning sections have been customized for your selected focus. You can now add specific content for each period.`);
         }
 
+        function hasWeeklyPlanningContent() {
+            const tableBody = document.getElementById('weeklyPlanTable');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            if (rows.length === 0) {
+                return false;
+            }
+            
+            // Check each row for content
+            for (const row of rows) {
+                const inputs = row.querySelectorAll('input, textarea');
+                for (const input of inputs) {
+                    const value = input.value.trim();
+                    // Check if there's meaningful content
+                    // Skip default/empty values and placeholders
+                    if (value && 
+                        value !== 'Curriculum Resource' &&
+                        !value.match(/^Week \d+ content\.\.\.$/)) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+
         function generatePeriodPlan() {
-            const period = document.getElementById('quarterSelect').value;
-            const year = document.getElementById('academicYear').value;
-            const country = document.getElementById('countryRegion').value;
-            const language = document.getElementById('interfaceLanguage').value;
+            const period = document.getElementById('periodSelect')?.value || 'q1';
+            const year = document.getElementById('globalAcademicYear')?.value || '2024-2025';
+            const country = document.getElementById('globalCountryRegion')?.value || 'us';
+            const language = document.getElementById('globalInterfaceLanguage')?.value || 'en';
             
             const curriculum = globalCurricula[country];
             if (!curriculum) return;
+            
+            // Check if there's existing content and prompt user
+            if (hasWeeklyPlanningContent()) {
+                const shouldContinue = confirm('This will overwrite your existing period planning content. Continue?');
+                if (!shouldContinue) {
+                    return; // Exit without making changes
+                }
+            }
             
             // Clear and populate weekly planning table with subjects from selected country
             const tableBody = document.getElementById('weeklyPlanTable');
@@ -3549,7 +3583,9 @@ function showView(viewId) {
             });
             
             // Update academic year based on school year start
-            updateAcademicYear();
+            if (typeof updateAcademicYear === 'function') {
+                updateAcademicYear();
+            }
             
             alert(`✅ Generated period plan for ${period} ${year}!\n\nCountry: ${curriculum.name}\nStandards: ${curriculum.standards}\nInterface: ${language}\n\nThe weekly planning table has been populated with subjects from the ${curriculum.name} curriculum. You can now add specific content for each week.`);
         }
