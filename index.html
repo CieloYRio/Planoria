@@ -739,15 +739,15 @@
                         
                         <div class="form-group">
                             <label for="globalInterfaceLanguage">🌐 Interface Language</label>
-                            <select id="globalInterfaceLanguage" class="form-control">
+                            <select id="globalInterfaceLanguage" class="form-control" onchange="changeLanguage(this.value)">
                                 <option value="en">English</option>
                                 <option value="es">Español</option>
                                 <option value="fr">Français</option>
                                 <option value="de">Deutsch</option>
                                 <option value="zh">中文</option>
-                                <option value="ja">日本語</option>
-                                <option value="ko">Korean - (한국어)</option>
-                                <option value="ar">Arabic - (العربية)</option>
+                                <option value="kr">한국어</option>
+                                <option value="jp">日本語</option>
+                                <option value="ar">العربية</option>
                             </select>
                         </div>
                     </div>
@@ -1212,45 +1212,168 @@
             }, 2000);
         }
 
-        function autoSave() {
-            const appData = {
-                subjects: subjects,
-                lessons: lessons,
-                formData: {
-                    learnerName: document.getElementById('learnerName')?.value || '',
-                    teacherName: document.getElementById('teacherName')?.value || '',
-                    globalCountryRegion: document.getElementById('globalCountryRegion')?.value || 'us',
-                    globalCalendarSystem: document.getElementById('globalCalendarSystem')?.value || 'quarterly',
-                    globalSchoolYearStart: document.getElementById('globalSchoolYearStart')?.value || '',
-                    globalAcademicYear: document.getElementById('globalAcademicYear')?.value || '',
-                    globalGradeLevel: document.getElementById('globalGradeLevel')?.value || '',
-                    globalInterfaceLanguage: document.getElementById('globalInterfaceLanguage')?.value || 'en'
-                },
-                planningData: {
-                    learningGoals: document.getElementById('learningGoals')?.value || '',
-                    prerequisites: document.getElementById('prerequisites')?.value || '',
-                    teachingNotes: document.getElementById('teachingNotes')?.value || '',
-                    mappingInsights: document.getElementById('mappingInsights')?.value || '',
-                    subjectSelect: document.getElementById('subjectSelect')?.value || '',
-                    subjectFocus: document.getElementById('subjectFocus')?.value || 'unit'
-                },
-                tableData: {
-                    monthlyPlan: getEnhancedTableData('monthlyPlanTable'),
-                    weeklyPlan: getEnhancedTableData('weeklyPlanTable'),
-                    schedule: getEnhancedTableData('scheduleTable')
-                },
-                timestamp: new Date().toISOString(),
-                version: '2.0'
-            };
-            
+        // Dynamic autosave key generation
+        function getAutosaveKey(type = 'main', context = '') {
+            switch(type) {
+                case 'subject':
+                    const subjectId = document.getElementById('subjectSelect')?.value || 'default';
+                    const focus = document.getElementById('subjectFocus')?.value || 'unit';
+                    return `curricrafter_autosave_subject_${subjectId}_${focus}`;
+                case 'period':
+                    const period = document.getElementById('periodScope')?.value || 'default';
+                    const scope = document.getElementById('planningScope')?.value || 'all';
+                    return `curricrafter_autosave_period_${period}_${scope}`;
+                case 'daily':
+                    const day = context || document.getElementById('scheduleDay')?.value || 'monday';
+                    return `curricrafter_autosave_daily_${day}`;
+                case 'weekly':
+                    return 'curricrafter_autosave_weekly';
+                default:
+                    return 'curricrafter_autosave';
+            }
+        }
+
+        // Save data with dynamic key
+        function dynamicAutoSave(type = 'main', context = '') {
+            const key = getAutosaveKey(type, context);
+            let data = {};
+
+            if (type === 'subject') {
+                data = {
+                    subjectData: {
+                        subjectSelect: document.getElementById('subjectSelect')?.value || '',
+                        subjectFocus: document.getElementById('subjectFocus')?.value || 'unit',
+                        learningGoals: document.getElementById('learningGoals')?.value || '',
+                        prerequisites: document.getElementById('prerequisites')?.value || '',
+                        teachingNotes: document.getElementById('teachingNotes')?.value || ''
+                    },
+                    tableData: {
+                        monthlyPlan: getEnhancedTableData('monthlyPlanTable'),
+                        weeklyPlan: getEnhancedTableData('weeklyPlanTable')
+                    },
+                    timestamp: new Date().toISOString()
+                };
+            } else if (type === 'period') {
+                data = {
+                    periodData: {
+                        period: document.getElementById('periodScope')?.value || '',
+                        scope: document.getElementById('planningScope')?.value || ''
+                    },
+                    tableData: {
+                        periodPlan: getEnhancedTableData('periodPlanTable')
+                    },
+                    timestamp: new Date().toISOString()
+                };
+            } else if (type === 'daily') {
+                const day = context || document.getElementById('scheduleDay')?.value || 'monday';
+                data = {
+                    day: day,
+                    scheduleData: getEnhancedTableData('scheduleTable'),
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                // Original autosave for main data
+                data = {
+                    subjects: subjects,
+                    lessons: lessons,
+                    formData: {
+                        learnerName: document.getElementById('learnerName')?.value || '',
+                        teacherName: document.getElementById('teacherName')?.value || '',
+                        globalCountryRegion: document.getElementById('globalCountryRegion')?.value || 'us',
+                        globalCalendarSystem: document.getElementById('globalCalendarSystem')?.value || 'quarterly',
+                        globalSchoolYearStart: document.getElementById('globalSchoolYearStart')?.value || '',
+                        globalAcademicYear: document.getElementById('globalAcademicYear')?.value || '',
+                        globalGradeLevel: document.getElementById('globalGradeLevel')?.value || '',
+                        globalInterfaceLanguage: document.getElementById('globalInterfaceLanguage')?.value || 'en'
+                    },
+                    dailyScheduleData: dailyScheduleData,
+                    timestamp: new Date().toISOString(),
+                    version: '2.1'
+                };
+            }
+
             try {
-                localStorage.setItem('curricrafter_autosave', JSON.stringify(appData));
-                lastSaveTime = new Date();
-                showSaveIndicator('✅ Saved', 'rgba(16, 185, 129, 0.95)');
-                console.log('Auto-saved at:', lastSaveTime.toLocaleTimeString());
+                localStorage.setItem(key, JSON.stringify(data));
+                console.log(`Auto-saved to ${key} at:`, new Date().toLocaleTimeString());
+                if (type === 'main') {
+                    showSaveIndicator('✅ Saved', 'rgba(16, 185, 129, 0.95)');
+                }
+                return true;
             } catch (error) {
-                console.error('Auto-save failed:', error);
-                showSaveIndicator('❌ Save Failed', 'rgba(239, 68, 68, 0.95)');
+                console.error(`Auto-save failed for ${key}:`, error);
+                if (type === 'main') {
+                    showSaveIndicator('❌ Save Failed', 'rgba(239, 68, 68, 0.95)');
+                }
+                return false;
+            }
+        }
+
+        // Load data with dynamic key
+        function dynamicAutoLoad(type = 'main', context = '') {
+            const key = getAutosaveKey(type, context);
+            try {
+                const savedData = localStorage.getItem(key);
+                if (!savedData) return false;
+                
+                const data = JSON.parse(savedData);
+                
+                if (type === 'subject' && data.subjectData) {
+                    // Restore subject planning data
+                    Object.keys(data.subjectData).forEach(fieldKey => {
+                        const element = document.getElementById(fieldKey);
+                        if (element && data.subjectData[fieldKey]) {
+                            element.value = data.subjectData[fieldKey];
+                        }
+                    });
+                    
+                    // Restore table data
+                    if (data.tableData) {
+                        setTimeout(() => {
+                            if (data.tableData.monthlyPlan) restoreEnhancedTableData('monthlyPlanTable', data.tableData.monthlyPlan);
+                            if (data.tableData.weeklyPlan) restoreEnhancedTableData('weeklyPlanTable', data.tableData.weeklyPlan);
+                        }, 100);
+                    }
+                } else if (type === 'daily' && data.scheduleData) {
+                    // Restore daily schedule data
+                    setTimeout(() => {
+                        restoreEnhancedTableData('scheduleTable', data.scheduleData);
+                    }, 100);
+                } else if (type === 'main') {
+                    // Original restore logic
+                    if (data.subjects) subjects = data.subjects;
+                    if (data.lessons) lessons = data.lessons;
+                    if (data.dailyScheduleData) dailyScheduleData = data.dailyScheduleData;
+                    
+                    // Restore form data
+                    if (data.formData) {
+                        Object.keys(data.formData).forEach(key => {
+                            const element = document.getElementById(key);
+                            if (element && data.formData[key]) {
+                                element.value = data.formData[key];
+                            }
+                        });
+                    }
+                }
+                
+                console.log(`Data restored from ${key}:`, new Date(data.timestamp).toLocaleTimeString());
+                return true;
+            } catch (error) {
+                console.error(`Failed to load data from ${key}:`, error);
+                return false;
+            }
+        }
+
+        function autoSave() {
+            // Save main data
+            dynamicAutoSave('main');
+            
+            // Also save current subject/focus specific data
+            dynamicAutoSave('subject');
+            
+            // Save current day's schedule
+            const currentDay = document.getElementById('scheduleDay')?.value;
+            if (currentDay) {
+                dynamicAutoSave('daily', currentDay);
             }
         }
 
@@ -1507,59 +1630,29 @@
 }
 
         function loadAutoSavedData() {
-            try {
-                const savedData = localStorage.getItem('curricrafter_autosave');
-                if (!savedData) return false;
-                
-                const data = JSON.parse(savedData);
-                
-                // Restore subjects and lessons
-                if (data.subjects) subjects = data.subjects;
-                if (data.lessons) lessons = data.lessons;
-                
-                // Restore form data
-                if (data.formData) {
-                    Object.keys(data.formData).forEach(key => {
-                        const element = document.getElementById(key);
-                        if (element && data.formData[key]) {
-                            element.value = data.formData[key];
-                        }
-                    });
-                }
-                
-                // Restore planning data
-                if (data.planningData) {
-                    Object.keys(data.planningData).forEach(key => {
-                        const element = document.getElementById(key);
-                        if (element && data.planningData[key]) {
-                            element.value = data.planningData[key];
-                        }
-                    });
-                }
-                
-                // Restore table data
-                // Restore table data with enhanced system
-                if (data.tableData) {
-                    setTimeout(() => {
-                        if (data.tableData.monthlyPlan) restoreEnhancedTableData('monthlyPlanTable', data.tableData.monthlyPlan);
-                        if (data.tableData.weeklyPlan) restoreEnhancedTableData('weeklyPlanTable', data.tableData.weeklyPlan);
-                        if (data.tableData.schedule) restoreEnhancedTableData('scheduleTable', data.tableData.schedule);
-                        
-                        // Trigger chart updates after table data is restored
-                        setTimeout(() => {
-                            refreshProgressTab();
-                        }, 100);
-                    }, 500);
-                }
-                
-                lastSaveTime = new Date(data.timestamp);
-                console.log('Data restored from auto-save:', lastSaveTime.toLocaleTimeString());
+            // Load main data first
+            const mainLoaded = dynamicAutoLoad('main');
+            
+            // Load current subject/focus data if available
+            dynamicAutoLoad('subject');
+            
+            // Load current day's schedule if available
+            const currentDay = document.getElementById('scheduleDay')?.value || 'monday';
+            dynamicAutoLoad('daily', currentDay);
+            
+            if (mainLoaded) {
+                lastSaveTime = new Date();
                 showSaveIndicator('✅ Data Restored', 'rgba(16, 185, 129, 0.95)');
+                
+                // Trigger updates
+                setTimeout(() => {
+                    refreshProgressTab();
+                }, 500);
+                
                 return true;
-            } catch (error) {
-                console.error('Failed to load auto-saved data:', error);
-                return false;
             }
+            
+            return false;
         }
 
 // ------------------- Progress Tab Charts -------------------
@@ -1607,16 +1700,25 @@ function updateProgressTabChart() {
     const savedData = JSON.parse(localStorage.getItem('curricrafter_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
 
-    const progressArray = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
-    const totalSlots = progressArray.length;
-    const completedSlots = progressArray.filter(v => v === 100).length;
-    const aggregate = totalSlots ? Math.round((completedSlots / totalSlots) * 100) : 0;
+    // Count the categorical progress values
+    const progressValues = savedData.tableData.schedule.progress.filter(p => p && p.trim() !== '');
+    const counts = {
+        'Excellent': 0,
+        'Good': 0,
+        'Needs Improvement': 0
+    };
+    
+    progressValues.forEach(value => {
+        if (counts.hasOwnProperty(value)) {
+            counts[value]++;
+        }
+    });
 
     const data = {
-        labels: ['Completed', 'Remaining'],
+        labels: ['Excellent', 'Good', 'Needs Improvement'],
         datasets: [{
-            data: [aggregate, 100 - aggregate],
-            backgroundColor: ['#10B981', '#E5E7EB'],
+            data: [counts['Excellent'], counts['Good'], counts['Needs Improvement']],
+            backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
             borderWidth: 0
         }]
     };
@@ -1641,22 +1743,66 @@ function updateProgressMatrixChart() {
     const savedData = JSON.parse(localStorage.getItem('curricrafter_autosave'));
     if (!savedData?.tableData?.schedule?.progress) return;
 
-    const labels = savedData.lessons?.map(l => l.name) || [];
-    const dataSet = savedData.tableData.schedule.progress.map(p => parseInt(p) || 0);
+    // Get schedule table rows to extract time slot labels
+    const scheduleData = savedData.tableData?.schedule?.rows || [];
+    const labels = scheduleData.map((row, index) => row[0] || `Slot ${index + 1}`);
+    
+    // Map categorical values to numeric values for visualization
+    const progressValues = savedData.tableData.schedule.progress;
+    const dataSet = progressValues.map(value => {
+        switch(value) {
+            case 'Excellent': return 100;
+            case 'Good': return 75;
+            case 'Needs Improvement': return 50;
+            default: return 0;
+        }
+    });
+    
+    // Create colors based on progress values
+    const colors = progressValues.map(value => {
+        switch(value) {
+            case 'Excellent': return '#10B981';
+            case 'Good': return '#F59E0B';
+            case 'Needs Improvement': return '#EF4444';
+            default: return '#E5E7EB';
+        }
+    });
 
     const data = {
         labels: labels,
         datasets: [{
-            label: 'Progress %',
+            label: 'Progress Level',
             data: dataSet,
-            backgroundColor: '#3B82F6'
+            backgroundColor: colors
         }]
     };
 
     const config = {
         type: 'bar',
         data: data,
-        options: { indexAxis: 'y', responsive: true, scales: { x: { min: 0, max: 100 } } }
+        options: { 
+            indexAxis: 'y', 
+            responsive: true, 
+            scales: { 
+                x: { 
+                    min: 0, 
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            if (value === 100) return 'Excellent';
+                            if (value === 75) return 'Good';
+                            if (value === 50) return 'Needs Improvement';
+                            return '';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
     };
 
     const ctx = document.getElementById('progressMatrixChart').getContext('2d');
@@ -2026,6 +2172,28 @@ function showView(viewId) {
             };
             
             subjects.push(newSubject);
+            
+            // Create autosave slots for the new subject
+            const focuses = ['unit', 'quarter', 'two-terms', 'semester', 'year'];
+            focuses.forEach(focus => {
+                const key = `curricrafter_autosave_subject_${newSubject.id}_${focus}`;
+                const initialData = {
+                    subjectData: {
+                        subjectSelect: newSubject.id.toString(),
+                        subjectFocus: focus,
+                        learningGoals: '',
+                        prerequisites: '',
+                        teachingNotes: ''
+                    },
+                    tableData: {
+                        monthlyPlan: { headers: [], rows: [] },
+                        weeklyPlan: { headers: [], rows: [] }
+                    },
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem(key, JSON.stringify(initialData));
+            });
+            
             closeModal('addSubjectModal');
             
             // Reset form
@@ -2035,6 +2203,8 @@ function showView(viewId) {
             
             // Update all interconnected sections
             updateAllSections();
+            
+            console.log(`Created autosave slots for new subject: ${name}`);
         }
 
         // Update all sections when data changes
@@ -2143,6 +2313,9 @@ function showView(viewId) {
 
         // Update subject title when selection changes
         function updateSubjectTitle() {
+            // Autosave current subject data before switching
+            dynamicAutoSave('subject');
+            
             const subjectId = document.getElementById('subjectSelect').value;
             const titleElement = document.getElementById('monthlyPlanningTitle');
             
@@ -2158,6 +2331,11 @@ function showView(viewId) {
             } else {
                 titleElement.textContent = 'Monthly Curriculum Planning';
             }
+            
+            // Load saved data for new subject/focus combination
+            setTimeout(() => {
+                dynamicAutoLoad('subject');
+            }, 100);
         }
 
         // Update calendar table based on global settings
@@ -2523,12 +2701,23 @@ function showView(viewId) {
         }
 
         function deleteSubject(id) {
-            if (confirm('Are you sure you want to delete this subject? This will also remove all associated lessons.')) {
+            if (confirm('Are you sure you want to delete this subject? This will also remove all associated lessons and saved planning data.')) {
                 // Remove subject
+                const subjectToDelete = subjects.find(subject => subject.id === id);
                 subjects = subjects.filter(subject => subject.id !== id);
                 
                 // Remove associated lessons
                 lessons = lessons.filter(lesson => lesson.subjectId !== id);
+                
+                // Remove autosave slots for this subject
+                if (subjectToDelete) {
+                    const focuses = ['unit', 'quarter', 'two-terms', 'semester', 'year'];
+                    focuses.forEach(focus => {
+                        const key = `curricrafter_autosave_subject_${id}_${focus}`;
+                        localStorage.removeItem(key);
+                        console.log(`Removed autosave slot: ${key}`);
+                    });
+                }
                 
                 // Update all interconnected sections
                 updateAllSections();
@@ -3025,6 +3214,9 @@ function showView(viewId) {
         }
 
         function updatePlanningFocus() {
+            // Autosave current data before changing focus
+            dynamicAutoSave('subject');
+            
             const focus = document.getElementById('subjectFocus').value;
             const tableBody = document.getElementById('monthlyPlanTable');
             const calendarSystem = document.getElementById('globalCalendarSystem').value;
@@ -3202,6 +3394,11 @@ function showView(viewId) {
             };
             
             console.log(`Planning focus updated to: ${focusDescriptions[focus]} using ${calendarSystem} system`);
+            
+            // Load saved data for new subject/focus combination
+            setTimeout(() => {
+                dynamicAutoLoad('subject');
+            }, 100);
         }
 
         function updatePlanningScope() {
@@ -4275,6 +4472,36 @@ function showView(viewId) {
             const tableBody = document.getElementById('weeklyScheduleTable');
             tableBody.innerHTML = '';
             
+            // First, update dailyScheduleData with current day's data
+            updateWeeklyFromDaily();
+            
+            // Load all saved daily schedules to ensure we have the latest data
+            const daysList = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            daysList.forEach(day => {
+                const savedKey = getAutosaveKey('daily', day);
+                const savedData = localStorage.getItem(savedKey);
+                if (savedData) {
+                    try {
+                        const dayData = JSON.parse(savedData);
+                        if (dayData.scheduleData && dayData.scheduleData.rows) {
+                            // Convert enhanced table data back to dailyScheduleData format
+                            dailyScheduleData[day] = dayData.scheduleData.rows.map(row => ({
+                                time: row[0] || '',
+                                subject: row[1] || '',
+                                subjectText: row[1] || '', // Will be updated with proper text
+                                objectives: row[2] || '',
+                                activities: row[3] || '',
+                                materials: row[4] || '',
+                                notes: row[5] || '',
+                                progress: row[6] || ''
+                            }));
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to load saved data for ${day}:`, error);
+                    }
+                }
+            });
+            
             // Get all unique time slots from daily schedules
             const allTimeSlots = new Set();
             Object.values(dailyScheduleData).forEach(dayData => {
@@ -4503,7 +4730,11 @@ function showView(viewId) {
         }
 
         function updateDaySchedule() {
-            // Save current day's data before switching
+            // Save current day's data before switching using dynamic autosave
+            const currentDay = document.getElementById('scheduleDay')?.value;
+            if (currentDay) {
+                dynamicAutoSave('daily', currentDay);
+            }
             updateWeeklyFromDaily();
             
             const selectedDay = document.getElementById('scheduleDay').value;
@@ -4512,24 +4743,29 @@ function showView(viewId) {
             // Clear current table
             scheduleTable.innerHTML = '';
             
-            // Load data for selected day
-            const dayData = dailyScheduleData[selectedDay] || [];
+            // Load saved data for the new day using dynamic autosave
+            const loaded = dynamicAutoLoad('daily', selectedDay);
             
-            if (dayData.length > 0) {
-                // Restore saved data for this day
-                dayData.forEach(slotData => {
-                    addTimeSlot(slotData.time);
-                    const lastRow = scheduleTable.lastElementChild;
-                    if (lastRow) {
-                        const subjectSelect = lastRow.cells[1].querySelector('select');
-                        if (subjectSelect && slotData.subject) {
-                            subjectSelect.value = slotData.subject;
+            if (!loaded) {
+                // Try loading from dailyScheduleData object as fallback
+                const dayData = dailyScheduleData[selectedDay] || [];
+                
+                if (dayData.length > 0) {
+                    // Restore saved data for this day
+                    dayData.forEach(slotData => {
+                        addTimeSlot(slotData.time);
+                        const lastRow = scheduleTable.lastElementChild;
+                        if (lastRow) {
+                            const subjectSelect = lastRow.cells[1].querySelector('select');
+                            if (subjectSelect && slotData.subject) {
+                                subjectSelect.value = slotData.subject;
+                            }
                         }
-                    }
-                });
-            } else {
-                // Load default template for new day
-                loadScheduleTemplate();
+                    });
+                } else {
+                    // Load default template for new day
+                    loadScheduleTemplate();
+                }
             }
             
             console.log(`Switched to ${selectedDay} schedule`);
@@ -4650,12 +4886,22 @@ function showView(viewId) {
     const selectLang = document.getElementById('globalInterfaceLanguage');
     if (selectLang) {
         selectLang.value = savedLang;
-        changeLanguage(savedLang);
+        if (typeof changeLanguage === 'function') {
+            changeLanguage(savedLang);
+        }
     }
 
     // Restore progress matrix charts
     restoreProgressMatrix();
 });
+
+// Language support function
+function changeLanguage(langCode) {
+    localStorage.setItem('selectedLanguage', langCode);
+    console.log(`Language changed to: ${langCode}`);
+    // Note: Full i18n implementation would go here
+    // For now, just save the preference
+}
 
 // Close modals when clicking outside
 document.addEventListener('click', function(event) {
