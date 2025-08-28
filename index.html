@@ -2,12 +2,237 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CurriCrafter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f7f9fa;
+        }
+        header {
+            background: #4f6d7a;
+            color: #fff;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+        }
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #e4eaed;
+            margin-bottom: 0.5rem;
+        }
+        .planner-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .planner-form section {
+            flex: 1 1 300px;
+            min-width: 250px;
+        }
+        .planner-form label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4f6d7a;
+        }
+        .planner-form input,
+        .planner-form select,
+        .planner-form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: #f0f4f7;
+        }
+        .planner-form textarea {
+            resize: vertical;
+        }
+        .btn {
+            padding: 0.7rem 2rem;
+            background: #4f6d7a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 1.1rem;
+        }
+        .btn:hover {
+            background: #34505c;
+        }
+        .curriculum-list {
+            margin-top: 2rem;
+        }
+        .curriculum-item {
+            background: #e9f1f7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+        }
+        .curriculum-item-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #34505c;
+            margin-bottom: 0.5rem;
+        }
+        .curriculum-item-details {
+            font-size: 1rem;
+            color: #29404a;
+        }
+        .planner-actions {
+            margin-top: 2rem;
+            text-align: right;
+        }
+        .delete-btn {
+            background: #bb2d2d;
+            color: #fff;
+            margin-left: 1rem;
+        }
+        @media (max-width: 700px) {
+            main {
+                padding: 1rem;
+            }
+            .planner-form {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>CurriCrafter</h1>
-    <p>Welcome to the CurriCrafter Planner!</p>
-    <!-- Additional content goes here -->
+    <header>
+        <h1>CurriCrafter</h1>
+        <div class="subtitle">Your curriculum planning assistant</div>
+    </header>
+    <main>
+        <form id="plannerForm" class="planner-form" autocomplete="off">
+            <section>
+                <label for="courseTitle">Course Title</label>
+                <input type="text" id="courseTitle" name="courseTitle" placeholder="e.g., Introduction to Biology" required>
+
+                <label for="courseLevel">Level</label>
+                <select id="courseLevel" name="courseLevel" required>
+                    <option value="">Select level</option>
+                    <option value="Elementary">Elementary</option>
+                    <option value="Middle School">Middle School</option>
+                    <option value="High School">High School</option>
+                    <option value="Undergraduate">Undergraduate</option>
+                    <option value="Graduate">Graduate</option>
+                </select>
+
+                <label for="subjectArea">Subject Area</label>
+                <input type="text" id="subjectArea" name="subjectArea" placeholder="e.g., Science, Literature" required>
+            </section>
+            <section>
+                <label for="learningObjectives">Learning Objectives</label>
+                <textarea id="learningObjectives" name="learningObjectives" rows="3" placeholder="List learning objectives..." required></textarea>
+
+                <label for="resources">Resources</label>
+                <textarea id="resources" name="resources" rows="2" placeholder="e.g., Textbooks, videos, online articles"></textarea>
+
+                <label for="assessmentMethods">Assessment Methods</label>
+                <textarea id="assessmentMethods" name="assessmentMethods" rows="2" placeholder="e.g., Quizzes, projects, presentations"></textarea>
+            </section>
+        </form>
+        <div class="planner-actions">
+            <button class="btn" type="submit" form="plannerForm">Add to Planner</button>
+        </div>
+        <div class="curriculum-list" id="curriculumList">
+            <!-- Curriculum planner items will appear here -->
+        </div>
+    </main>
+    <script>
+        // Curriculum planner logic
+        const plannerForm = document.getElementById('plannerForm');
+        const curriculumList = document.getElementById('curriculumList');
+
+        function getCurricula() {
+            return JSON.parse(localStorage.getItem('curricula') || '[]');
+        }
+
+        function saveCurricula(curricula) {
+            localStorage.setItem('curricula', JSON.stringify(curricula));
+        }
+
+        function renderCurricula() {
+            const curricula = getCurricula();
+            curriculumList.innerHTML = '';
+            if (curricula.length === 0) {
+                curriculumList.innerHTML = '<p style="text-align:center;color:#bbb;">No curriculum plans added yet.</p>';
+                return;
+            }
+            curricula.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'curriculum-item';
+                div.innerHTML = `
+                    <div class="curriculum-item-title">${item.courseTitle}</div>
+                    <div class="curriculum-item-details">
+                        <strong>Level:</strong> ${item.courseLevel}<br>
+                        <strong>Subject Area:</strong> ${item.subjectArea}<br>
+                        <strong>Learning Objectives:</strong><br>
+                        <ul>${item.learningObjectives.split('\n').map(s => `<li>${s.trim()}</li>`).join('')}</ul>
+                        <strong>Resources:</strong> ${item.resources ? item.resources : '<em>None specified</em>'}<br>
+                        <strong>Assessment Methods:</strong> ${item.assessmentMethods ? item.assessmentMethods : '<em>None specified</em>'}
+                    </div>
+                    <div style="text-align:right;margin-top:1rem;">
+                        <button class="btn delete-btn" data-idx="${idx}">Delete</button>
+                    </div>
+                `;
+                curriculumList.appendChild(div);
+            });
+        }
+
+        plannerForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const formData = new FormData(plannerForm);
+            const curriculum = {
+                courseTitle: formData.get('courseTitle').trim(),
+                courseLevel: formData.get('courseLevel'),
+                subjectArea: formData.get('subjectArea').trim(),
+                learningObjectives: formData.get('learningObjectives').trim(),
+                resources: formData.get('resources').trim(),
+                assessmentMethods: formData.get('assessmentMethods').trim()
+            };
+            const curricula = getCurricula();
+            curricula.push(curriculum);
+            saveCurricula(curricula);
+            renderCurricula();
+            plannerForm.reset();
+        });
+
+        curriculumList.addEventListener('click', e => {
+            if (e.target.classList.contains('delete-btn')) {
+                const idx = Number(e.target.getAttribute('data-idx'));
+                const curricula = getCurricula();
+                curricula.splice(idx, 1);
+                saveCurricula(curricula);
+                renderCurricula();
+            }
+        });
+
+        // On load
+        renderCurricula();
+    </script>
 </body>
 </html>
